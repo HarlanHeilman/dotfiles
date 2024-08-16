@@ -152,3 +152,9 @@ cd ~\.dotfiles\
 ls
 code . 
 git status
+git add . 
+ls
+git commit -m "Init"
+git remote add origin git@github.com:HarlanHeilman/dotfiles.git
+git branch -M main
+git push -u origin main
