@@ -187,9 +187,7 @@
       "left": "41% !important",
       "top": "250px !important",
       "padding": "15px !important",
-    //   "background-color": "rgb(65, 69, 89) !important",
-      "border-radius": "10px !important",
-    //   "border": "1px solid #007ACC !important"
+      "border-radius": "10px !important"
     },
     ".quick-input-widget .quick-input-header": "padding:0px!important;margin-bottom:10px;",
     ".quick-input-widget .monaco-inputbox": {

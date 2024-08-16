@@ -12,5 +12,15 @@
     {
         "key": "ctrl+n",
         "command": "explorer.newFile"
+    },
+    {
+        "key": "ctrl+f",
+        "command": "workbench.action.gotoSymbol",
+        "when": "!accessibilityHelpIsShown && !accessibleViewIsShown"
+    },
+    {
+        "key": "ctrl+shift+f",
+        "command": "workbench.action.gotoLine",
+        "when": "!accessibilityHelpIsShown && !accessibleViewIsShown"
     }
 ]
