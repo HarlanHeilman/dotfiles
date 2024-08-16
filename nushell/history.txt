@@ -161,3 +161,21 @@ git push -u origin main
 $Env:HAS_SELECTION=0; c:\Users\hduva\.vscode\extensions\tomrijndorp.find-it-faster-0.0.38\find_files.ps1  'c:\Users\hduva\.dotfiles'
 cd c:\Users\hduva\.dotfiles\Code
 ls
+las
+ls
+plugin list
+cd .dotfiles\
+ls
+cd nushell\
+ls
+cargo install nu_plugin_polars
+cd .dotfiles\
+ls
+cd nushell\
+cargo install nu_plugin_polars
+gstat -h
+plugin list
+ls
+plugin add ~\.cargo\bin\nu_plugin_polars.exe
+plugin list
+ls

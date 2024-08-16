@@ -99,7 +99,7 @@
   },
   // Auto Docstring
   "autoDocstring.docstringFormat": "numpy",
-  "autoDocstring.startOnNewLine": false,
+  "autoDocstring.startOnNewLine": true,
   // Ruff
   "ruff.enable": true,
   "ruff.lint.run": "onSave",
