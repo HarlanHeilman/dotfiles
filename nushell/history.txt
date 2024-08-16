@@ -179,3 +179,4 @@ ls
 plugin add ~\.cargo\bin\nu_plugin_polars.exe
 plugin list
 ls
+gc "Modified"

@@ -222,3 +222,9 @@ $env.config = {
 alias l = ls -l
 alias lg = lazygit
 def gc  [args] { git add .; git commit -m $args; git push }
+
+# Modern unix
+alias grep = rg
+alias df = duf
+alias cat = bat
+alias dig = dog

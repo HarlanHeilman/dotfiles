@@ -15,11 +15,8 @@ zoxide init nushell --cmd cd
     | save -f ~/.dotfiles/zoxide/init.nu
 
 $env.SP = "~/Washington State University (email.wsu.edu)/Carbon Lab Research Group - Documents"
-
-# Use nushell functions to define your right and left prompt
-$env.PROMPT_COMMAND = {|| create_left_prompt }
-# FIXME: This default is not implemented in rust code as of 2023-09-08.
-$env.PROMPT_COMMAND_RIGHT = {|| create_right_prompt }
+$env.SP_USER = ($env.SP | path join "Harlan Heilman")
+$env.SP_DATA = ($env.SP | path join "Synchrotron Logistics and Data")
 
 # The prompt indicators are environmental variables that represent
 # the state of the prompt
