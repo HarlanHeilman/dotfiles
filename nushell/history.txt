@@ -1,0 +1,154 @@
+ls
+cd projects\
+ls
+git new NushellTools
+mkdir NushellTools
+ls
+cd NushellTools
+ls
+git init
+ls
+code README.md
+ls
+git commit -m "Init"
+gh auth login
+ls
+git commit -m "Init"
+gh auth login
+git commit -m "Init"
+cd ~
+ls
+code ./.gitconfig
+gh auth login
+ls
+cd .ssh
+ls
+cd ..
+cd projects\PowershellTools\
+ls
+cd ..
+cd NushellTools\
+ls
+git commit -m "Init"
+code config --list
+code config --list --show-origin
+git config --global user.name HarlanHeilman
+git config --global user.email Harlan.Heilman@wsu.edu
+git commit -m "Init"
+git add . 
+git commit -m "Init"
+git remote add origin https://github.com/HarlanHeilman/NushellTools.git
+git branch -M main
+git push -u origin main
+ls
+$env.config
+$env | reject config | transpose key val | each {|r| echo $"$env.($r.key) = '($r.val)'"} | str join (char nl)
+code $env.config
+$nu.env-path
+code $nu.env-path
+ls
+remove-item projects -Force
+rm -rf projects\
+ls
+& oh-my-posh init nu --config "$env:POSH_THEMES_PATH/catppuccin_frappe.omp.json"
+oh-my-posh init nu --config "$env:POSH_THEMES_PATH/catppuccin_frappe.omp.json"
+ls
+mkdir .dotfiles
+ls
+cd .dotfiles\
+code . 
+$nu.env-path
+$nu.default-config-dir
+ls
+cd $nu.default-config-dir
+ls
+code . 
+$env.config = {<\n>show_banner: false,<\n>}
+$env.config = {<\n>  ...<\n>  show_banner: false,<\n>  ...<\n>}
+config nu
+$env.config.buffer_editor = vscode
+$env.EDITOR = code
+config nu
+ls
+cd ..
+ls
+mkdir catppuccin
+ls
+cd catppuccin\
+code . 
+ls
+cd ..
+ls
+oh-my-posh init nu --config ~\.dotfiles\catppuccin\catppuccin_frappe.omp.json
+source ~\.oh-my-posh.nu
+ls
+mamba -h
+conda -h
+micromamba -h
+pip -h
+ls
+pip install uv
+winget fzf
+winget install fzf
+fzf
+lazygit
+winget install ripgrep
+$ winget install BurntSushi.ripgrep.MSVC
+winget install BurntSushi.ripgrep.MSVC
+cd $env.APPDATA\Code\
+cd $env.APPDATA
+ls
+cd Code\
+ls
+cd ..
+ls
+cp Code ~\.dotfiles\ --recursive 
+cd ~\.dotfiles\
+ls
+cd Code\
+ls
+cd ..
+cd $env.APPDATA
+du
+mklink -h
+mklink /D Code\ ~\.dotfiles\Code\
+rm -rf Code\
+mklink /D Code\ ~\.dotfiles\Code\
+ls
+cd ~\.dotfiles\
+ls
+code . 
+where nu
+cd ~
+ls **/*nu.exe
+ls **/nu.exe
+cd .dotfiles\
+ls
+code . 
+ls
+git init
+git status
+git add . 
+cd $env.APPDATA
+ls
+rm -rf Code\
+cp ~\.dotfiles\Code  --recursive 
+cp ~\.dotfiles\Code \Code --recursive 
+ls
+explorer
+explorer . 
+ls
+cd Code\
+ls
+cd User\
+ls
+mklink keybindings.json ~\.dotfiles\Code\keybindings.json
+rm -rf keybindings.json settings.json tasks.json
+mklink keybindings.json ~\.dotfiles\Code\keybindings.json
+mklink settings.json ~\.dotfiles\Code\settings.json
+mklink tasks.json ~\.dotfiles\Code\tasks.json
+ls
+cd ~\.dotfiles\
+ls
+code . 
+git status

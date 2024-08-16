@@ -1,0 +1,29 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Maximize Panel",
+            "command": "${command:workbench.action.toggleMaximizedPanel}",
+            "type": "shell",
+            "problemMatcher": []
+        },
+        {
+            "label": "LazyGit",
+            "type": "process",
+            "command": "lazygit",
+            "problemMatcher": [],
+            "presentation": {
+              "echo": true,
+              "reveal": "always",
+              "focus": true,
+              "panel": "shared",
+              "showReuseMessage": false,
+              "clear": false,
+              "close": true
+            }
+        },
+
+    ]
+}

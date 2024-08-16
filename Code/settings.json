@@ -1,0 +1,219 @@
+{
+  // Editor
+  "editor.bracketPairColorization.enabled": false,
+  "editor.cursorBlinking": "solid",
+  "editor.cursorSmoothCaretAnimation": "on",
+  "editor.cursorStyle": "block",
+  "editor.foldingHighlight": true,
+  "editor.fontFamily": "'RobotoMono Nerd Font Mono', monospace",
+  "editor.fontLigatures": true,
+  "editor.fontSize": 17,
+  "editor.formatOnSave": true,
+  "editor.inlayHints.enabled": "offUnlessPressed",
+  "editor.lineDecorationsWidth": 14,
+  "editor.lineNumbers": "relative",
+  "editor.minimap.autohide": true,
+  "editor.minimap.renderCharacters": false,
+  "editor.minimap.scale": 3,
+  "editor.minimap.showSlider": "mouseover",
+  "editor.padding.bottom": 14,
+  "editor.padding.top": 14,
+  "editor.renderControlCharacters": true,
+  "editor.renderWhitespace": "trailing",
+  "editor.tabSize": 4,
+  "editor.wordWrap": "off",
+  "editor.wordWrapColumn": 88,
+  "editor.rulers": [88, 120],
+  "breadcrumbs.filePath": "on",
+  "editor.stickyScroll.enabled": false,
+  // Workbench
+  "workbench.editorAssociations": {
+    "*.ipynb": "jupyter-notebook",
+    "*.pdf": "default"
+  },
+  "workbench.startupEditor": "none",
+  "workbench.tips.enabled": false,
+  "workbench.colorTheme": "Catppuccin Frappé",
+  "workbench.iconTheme": "catppuccin-frappe",
+  "workbench.editor.tabSizing": "fixed",
+  "window.title": "",
+  "window.autoDetectColorScheme": false,
+  "window.titleBarStyle": "native",
+  "window.newWindowDimensions": "inherit",
+  "window.openFilesInNewWindow": "off",
+  "window.openFoldersInNewWindow": "on",
+  // Explorer / File Explorer
+  "explorer.sortOrder": "type",
+  "files.defaultLanguage": "python",
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "files.trimTrailingWhitespace": true,
+  "files.associations": {
+    ".css": "tailwindcss"
+  },
+  // Git
+  "git.confirmSync": false,
+  "git.openRepositoryInParentFolders": "never",
+  "git.autofetch": true,
+  "git.enableSmartCommit": true,
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": true,
+    "markdown": true,
+    "scminput": false
+  },
+  // Minimal Mode
+  "zenMode.centerLayout": false,
+  "zenMode.fullScreen": false,
+  "zenMode.hideLineNumbers": false,
+  "zenMode.hideStatusBar": true,
+  "zenMode.silentNotifications": false,
+  // Terminal
+  "terminal.integrated.profiles.windows": {
+    "Nu": {
+      "path": "C:/Program Files/nu/bin/nu.exe",
+      "icon": "terminal-powershell"
+    }
+  },
+  "terminal.integrated.defaultProfile.windows": "Nu",
+  "terminal.integrated.gpuAcceleration": "auto",
+  "terminal.integrated.drawBoldTextInBrightColors": true,
+  "terminal.integrated.fontFamily": "'RobotoMono Nerd Font Mono', monospace",
+  "terminal.integrated.cursorBlinking": true,
+  "terminal.integrated.cursorStyle": "block",
+  "terminal.integrated.fontSize": 17,
+  "terminal.integrated.fontWeightBold": "bold",
+  "terminal.integrated.lineHeight": 1.2,
+  // Python
+  "python.languageServer": "Pylance",
+  "python.analysis.autoFormatStrings": true,
+  "python.analysis.autoImportCompletions": true,
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.codeActionsOnSave": {
+      "source.organizeImports.ruff": "explicit",
+      "source.fixAll": "explicit",
+      "source.fixAll.eslint": "explicit"
+    },
+    "editor.formatOnSave": true
+  },
+  // Auto Docstring
+  "autoDocstring.docstringFormat": "numpy",
+  "autoDocstring.startOnNewLine": false,
+  // Ruff
+  "ruff.enable": true,
+  "ruff.lint.run": "onSave",
+  "ruff.configuration": "./pyproject.toml",
+  // Python Path
+  "python.defaultInterpreterPath": "${env.PYTHON}",
+  // Jupyter\Notebook
+  "notebook.compactView": true,
+  "notebook.cellToolbarLocation": {
+    "default": "right",
+    "jupyter-notebook": "left"
+  },
+  "notebook.scrolling.experimental.anchorToFocusedCell": "off",
+  "notebook.outline.showCodeCells": true,
+  "notebook.formatOnCellExecution": false,
+  // GitLens
+  "gitlens.mode.active": "zen",
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "explorer.confirmDelete": false,
+  "security.workspace.trust.untrustedFiles": "open",
+  "workbench.layoutControl.enabled": false,
+  "window.commandCenter": false,
+  "notebook.lineNumbers": "on",
+  "notebook.cellFocusIndicator": "border",
+  "errorLens.delayMode": "debounce",
+  "errorLens.margin": "10ch",
+  "errorLens.messageBackgroundMode": "none",
+  "errorLens.searchForProblemQuery": "",
+  "errorLens.alignMessage": {
+    "start": 88,
+    "end": 0,
+    "minimumMargin": 0,
+    "useFixedPosition": true
+  },
+  "mypy-type-checker.reportingScope": "workspace",
+  "mypy-type-checker.importStrategy": "fromEnvironment",
+  "window.customTitleBarVisibility": "auto",
+  "jupyter.enableExtendedPythonKernelCompletions": true,
+  "editor.defaultFormatter": "charliermarsh.ruff",
+  "jupyter.experiments.optInto": [],
+  "jupyter.widgetScriptSources": ["jsdelivr.com", "unpkg.com"],
+  "jupyter.askForKernelRestart": false,
+  "[rust]": {
+    "editor.defaultFormatter": "rust-lang.rust-analyzer"
+  },
+  "github.copilot.editor.enableAutoCompletions": true,
+  "update.mode": "manual",
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "mssql.objectExplorer.groupBySchema": false,
+  "mssql.connections": [
+    {
+      "server": "HDUVALLH",
+      "database": "NEXAFS",
+      "authenticationType": "Integrated",
+      "encrypt": "Mandatory",
+      "trustServerCertificate": true,
+      "user": "",
+      "password": "",
+      "connectTimeout": 15,
+      "commandTimeout": 30,
+      "applicationName": "vscode-mssql"
+    }
+  ],
+  "[sql]": {
+    "editor.defaultFormatter": "ms-mssql.mssql"
+  },
+  "mssql.enableQueryHistoryCapture": true,
+  "explorer.confirmPasteNative": false,
+  "explorer.confirmDragAndDrop": false,
+  "apc.electron": {
+    "frame": false,
+    "visualEffectState": "active"
+  },
+  "apc.stylesheet": {
+    ".inline-tabs-placeholder": "display: none !important;",
+    ".monaco-hover": "border: 1px solid #007ACC !important;",
+    ".tree": "border: 1px solid #007ACC !important;",
+    ".quick-input-widget": {
+      "width": "900px !important",
+      "left": "41% !important",
+      "top": "250px !important",
+      "padding": "15px !important",
+    //   "background-color": "rgb(65, 69, 89) !important",
+      "border-radius": "10px !important",
+    //   "border": "1px solid #007ACC !important"
+    },
+    ".quick-input-widget .quick-input-header": "padding:0px!important;margin-bottom:10px;",
+    ".quick-input-widget .monaco-inputbox": {
+      "padding": "10px !important",
+      "border-radius": "5px!important"
+    },
+    ".quick-input-widget .monaco-list-rows": "top: 0 !important;max-height:670px;min-height:300px;",
+    ".quick-input-widget .monaco-list-row": "position:static!important;border-bottom: 1px solid #333942;padding:5px!important;height:auto!important;",
+    ".quick-input-widget .quick-input-list-entry": "position:relative;padding:0 5px 0px 15px;",
+    ".quick-input-widget .quick-input-list-entry .codicon[class*=codicon-]": "font-size:12px;",
+    ".quick-input-widget .quick-input-list .quick-input-list-entry.quick-input-list-separator-border": "border-top-width:0px!important;",
+    ".title-actions": "display: none !important",
+    ".quick-input-widget.show-file-icons, .editor-widget.find-widget": "box-shadow: none !important",
+    ".filematch .monaco-icon-label:before, .custom-list-row.results .monaco-list-row .monaco-icon-label:before": "background-position: 0 bottom !important",
+    ".filematch .monaco-count-badge": "padding: 5px 6px 0 6px !important",
+    ".sidebar .title-label": "padding: 0 !important",
+    ".monaco-workbench .monaco-list:not(.element-focused):focus:before": "outline: none !important",
+    ".sidebar": "border: none !important",
+    ".quick-input-list-row div": "display: flex !important; align-items: center !important",
+    ".panel .composite.title": "visibility: hidden !important",
+    ".title.show-file-icons .label-container .monaco-icon-label.file-icon": "padding-bottom: 6px !important",
+    ".sidebar .title-label h2": "line-height: 2.8 !important",
+    ".monaco-editor .scroll-decoration": "display: none !important",
+    ".monaco-scrollable-element > .shadow.top": "display: none !important"
+  },
+  "apc.font.family": "'Zed Sans'"
+}

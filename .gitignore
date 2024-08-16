@@ -1,0 +1,4 @@
+# ignore everything under python
+python/*
+# Ignore everything under Code that is not user User
+!Code/User/*

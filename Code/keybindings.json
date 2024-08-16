@@ -1,0 +1,16 @@
+// Place your key bindings in this file to override the defaults
+[
+    {
+        "key": "ctrl+q",
+        "command": "workbench.action.quit"
+    },
+    {
+        "key": "ctrl+`",
+        "command": "-workbench.action.terminal.toggleTerminal",
+        "when": "terminalFocus"
+    },
+    {
+        "key": "ctrl+n",
+        "command": "explorer.newFile"
+    }
+]
