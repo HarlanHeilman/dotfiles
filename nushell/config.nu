@@ -219,12 +219,35 @@ $env.config = {
 }
 
 # Aliases
-alias l = ls -l
-alias lg = lazygit
+alias core-ls = ls
+def old-ls [path] {
+  core-ls $path | sort-by type name -i
+}
+def ls [path?, args?] {
+  if $path == null {
+    old-ls . | sort-by type name -i
+  } else {
+    old-ls $path | sort-by type name -i
+  }
+}
+
+alias where = which
+
+# git
 def gc  [args] { git add .; git commit -m $args; git push }
+
+# fzf
+alias f = fzf --height=90% --layout=reverse --info=inline --border --margin=1 --padding=1 --preview 'bat --color=always --style=header,grid --line-range :500 {}'
 
 # Modern unix
 alias grep = rg
 alias df = duf
 alias cat = bat
 alias dig = dog
+
+# python virtualenv
+alias py = python
+
+# uv
+alias activate = .venv\Scripts\activate
+alias deactivate = .venv\Scripts\deactivate

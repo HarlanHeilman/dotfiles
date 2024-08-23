@@ -214,5 +214,6 @@
     ".monaco-scrollable-element > .shadow.top": "display: none !important"
   },
   "apc.font.family": "'Zed Sans'",
-  "terminal.integrated.enableMultiLinePasteWarning": false
+  "terminal.integrated.enableMultiLinePasteWarning": false,
+  "workbench.statusBar.visible": false
 }

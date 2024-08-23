@@ -1,19 +1,6 @@
 # Nushell Environment Config File
 #
 # version = "0.96.1"
-
-mkdir ~/.dotfiles/starship
-starship init nu
-    | str replace "term size -c" "term size"
-    | str replace --all "let-env " "$env."
-    | save -f ~/.dotfiles/starship/init.nu
-
-mkdir ~/.dotfiles/zoxide
-zoxide init nushell --cmd cd
-    | str replace --all "-- $rest" "-- ...$rest"
-    | str replace "--interactive -- $rest" "--interactive -- ...$rest"
-    | save -f ~/.dotfiles/zoxide/init.nu
-
 $env.SP = "~/Washington State University (email.wsu.edu)/Carbon Lab Research Group - Documents"
 $env.SP_USER = ($env.SP | path join "Harlan Heilman")
 $env.SP_DATA = ($env.SP | path join "Synchrotron Logistics and Data")
@@ -52,3 +39,8 @@ $env.NU_LIB_DIRS = [
 $env.NU_PLUGIN_DIRS = [
     ($nu.default-config-dir | path join 'plugins') # add <nushell-config-dir>/plugins
 ]
+
+
+source ~/.dotfiles/zoxide/init.nu
+source ~/.dotfiles/starship/init.nu
+source ~/.dotfiles/fzf/init.nu
