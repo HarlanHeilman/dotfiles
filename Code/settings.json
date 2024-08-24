@@ -85,9 +85,9 @@
   "terminal.integrated.fontWeightBold": "bold",
   "terminal.integrated.lineHeight": 1.2,
   // Python
-  "python.languageServer": "Pylance",
-  "python.analysis.autoFormatStrings": true,
-  "python.analysis.autoImportCompletions": true,
+  "python.terminal.activateEnvInCurrentTerminal": true,
+  "python.condaPath": "$env.CONDA",
+  "python.defaultInterpreterPath": "${env.PYTHON}",
   "[python]": {
     "editor.defaultFormatter": "charliermarsh.ruff",
     "editor.codeActionsOnSave": {
@@ -104,19 +104,25 @@
   "ruff.enable": true,
   "ruff.lint.run": "onSave",
   "ruff.configuration": "./pyproject.toml",
-  // Python Path
-  "python.defaultInterpreterPath": "${env.PYTHON}",
+  "ruff.interpreter": [
+    " C:\\Users\\hduva\\.dotfiles\\python\\conda\\python.exe"
+  ],
+  "ruff.ignoreStandardLibrary": false,
+  "ruff.nativeServer": "off",
+  "ruff.path": [
+    "C:\\Users\\hduva\\.dotfiles\\python\\conda\\Lib\\site-packages\\ruff"
+  ],
+  "ruff.showNotifications": "always",
+  "ruff.trace.server": "messages",
   // Jupyter\Notebook
   "notebook.compactView": true,
   "notebook.cellToolbarLocation": {
     "default": "right",
     "jupyter-notebook": "left"
   },
-  "notebook.scrolling.experimental.anchorToFocusedCell": "off",
   "notebook.outline.showCodeCells": true,
-  "notebook.formatOnCellExecution": false,
+  "notebook.formatOnCellExecution": true,
   // GitLens
-  "gitlens.mode.active": "zen",
   "typescript.updateImportsOnFileMove.enabled": "always",
   "explorer.confirmDelete": false,
   "security.workspace.trust.untrustedFiles": "open",
@@ -134,8 +140,6 @@
     "minimumMargin": 0,
     "useFixedPosition": true
   },
-  "mypy-type-checker.reportingScope": "workspace",
-  "mypy-type-checker.importStrategy": "fromEnvironment",
   "window.customTitleBarVisibility": "auto",
   "jupyter.enableExtendedPythonKernelCompletions": true,
   "editor.defaultFormatter": "charliermarsh.ruff",
@@ -215,5 +219,5 @@
   },
   "apc.font.family": "'Zed Sans'",
   "terminal.integrated.enableMultiLinePasteWarning": false,
-  "workbench.statusBar.visible": false
+  "workbench.statusBar.visible": false,
 }

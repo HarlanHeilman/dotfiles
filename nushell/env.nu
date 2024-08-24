@@ -1,6 +1,12 @@
 # Nushell Environment Config File
 #
 # version = "0.96.1"
+
+# nice things
+$env.DOTFILES = "~/.dotfiles"
+$env.PROJECTS = "~/.projects"
+
+# wsu
 $env.SP = "~/Washington State University (email.wsu.edu)/Carbon Lab Research Group - Documents"
 $env.SP_USER = ($env.SP | path join "Harlan Heilman")
 $env.SP_DATA = ($env.SP | path join "Synchrotron Logistics and Data")
@@ -40,7 +46,5 @@ $env.NU_PLUGIN_DIRS = [
     ($nu.default-config-dir | path join 'plugins') # add <nushell-config-dir>/plugins
 ]
 
-
-source ~/.dotfiles/zoxide/init.nu
 source ~/.dotfiles/starship/init.nu
 source ~/.dotfiles/fzf/init.nu
