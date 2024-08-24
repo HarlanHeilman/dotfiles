@@ -1,7 +1,8 @@
 {
   "apc.electron": {
     "frame": false,
-    "visualEffectState": "active"
+    "visualEffectState": "active",
+    "titleBarStyle": "hidden"
   },
   "apc.stylesheet": {
     ".inline-tabs-placeholder": "display: none !important;",
@@ -38,7 +39,10 @@
     ".monaco-editor .scroll-decoration": "display: none !important",
     ".monaco-scrollable-element > .shadow.top": "display: none !important"
   },
-  "apc.font.family": "'Zed Sans'",
+  "apc.font.size": 16,
+  "apc.activityBar": {
+    "size": 0
+  },
   // Editor
   "editor.bracketPairColorization.enabled": false,
   "editor.cursorBlinking": "solid",
@@ -126,7 +130,7 @@
   "terminal.integrated.lineHeight": 1.2,
   // Python
   "python.terminal.activateEnvInCurrentTerminal": true,
-  "python.condaPath": "$env.CONDA",
+  "python.condaPath": "${env.CONDA}",
   "python.defaultInterpreterPath": "${env.PYTHON}",
   "[python]": {
     "editor.defaultFormatter": "charliermarsh.ruff",
@@ -145,12 +149,12 @@
   "ruff.lint.run": "onSave",
   "ruff.configuration": "./pyproject.toml",
   "ruff.interpreter": [
-    " C:\\Users\\hduva\\.dotfiles\\python\\conda\\python.exe"
+    "${workspaceFolder}\\.venv\\Scripts\\python.exe"
   ],
   "ruff.ignoreStandardLibrary": false,
   "ruff.nativeServer": "off",
   "ruff.path": [
-    "C:\\Users\\hduva\\.dotfiles\\python\\conda\\Lib\\site-packages\\ruff"
+    "${workspaceFolder}\\.venv\\Scripts\\Scripts\\ruff.exe"
   ],
   "ruff.showNotifications": "always",
   "ruff.trace.server": "messages",
@@ -220,4 +224,8 @@
   "explorer.confirmDragAndDrop": false,
   "terminal.integrated.enableMultiLinePasteWarning": false,
   "workbench.statusBar.visible": false,
+  "mypy-type-checker.importStrategy": "fromEnvironment",
+  "mypy-type-checker.preferDaemon": true,
+  "mypy-type-checker.reportingScope": "workspace",
+  "window.density.editorTabHeight": "compact",
 }

@@ -22,5 +22,13 @@
         "key": "ctrl+shift+f",
         "command": "workbench.action.gotoLine",
         "when": "!accessibilityHelpIsShown && !accessibleViewIsShown"
+    },
+    {
+        "key": "ctrl+shift+`",
+        "command": "prettier.openOutput"
+    },
+    {
+        "key": "ctrl+shift+`",
+        "command": "ruff.showLogs"
     }
 ]
