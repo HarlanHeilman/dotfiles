@@ -1,53 +1,64 @@
 {
+  "[python]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit",
+      "source.fixAll.eslint": "explicit",
+      "source.organizeImports.ruff": "explicit"
+    },
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true
+  },
+  "[rust]": {
+    "editor.defaultFormatter": "rust-lang.rust-analyzer"
+  },
+  "[sql]": {
+    "editor.defaultFormatter": "ms-mssql.mssql"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  // apc
   "apc.electron": {
     "frame": false,
     "visualEffectState": "active",
-    "titleBarStyle": "hidden"
+  },
+  "apc.activityBar": {
+    "visible": false
   },
   "apc.stylesheet": {
-    ".inline-tabs-placeholder": "display: none !important;",
-    ".monaco-hover": "border: 1px solid #007ACC !important;",
-    ".tree": "border: 1px solid #007ACC !important;",
+    ".quick-input-list-row div": "display: flex !important; align-items: center !important",
     ".quick-input-widget": {
-      "width": "900px !important",
+      "border-radius": "10px !important",
       "left": "41% !important",
-      "top": "250px !important",
       "padding": "15px !important",
-      "border-radius": "10px !important"
+      "top": "250px !important",
+      "width": "900px !important"
     },
-    ".quick-input-widget .quick-input-header": "padding:0px!important;margin-bottom:10px;",
     ".quick-input-widget .monaco-inputbox": {
-      "padding": "10px !important",
-      "border-radius": "5px!important"
+      "border-radius": "5px!important",
+      "padding": "10px !important"
     },
-    ".quick-input-widget .monaco-list-rows": "top: 0 !important;max-height:670px;min-height:300px;",
     ".quick-input-widget .monaco-list-row": "position:static!important;border-bottom: 1px solid #333942;padding:5px!important;height:auto!important;",
+    ".quick-input-widget .monaco-list-rows": "top: 0 !important;max-height:670px;min-height:300px;",
+    ".quick-input-widget .quick-input-header": "padding:0px!important;margin-bottom:10px;",
+    ".quick-input-widget .quick-input-list .quick-input-list-entry.quick-input-list-separator-border": "border-top-width:0px!important;",
     ".quick-input-widget .quick-input-list-entry": "position:relative;padding:0 5px 0px 15px;",
     ".quick-input-widget .quick-input-list-entry .codicon[class*=codicon-]": "font-size:12px;",
-    ".quick-input-widget .quick-input-list .quick-input-list-entry.quick-input-list-separator-border": "border-top-width:0px!important;",
-    ".title-actions": "display: none !important",
     ".quick-input-widget.show-file-icons, .editor-widget.find-widget": "box-shadow: none !important",
-    ".filematch .monaco-icon-label:before, .custom-list-row.results .monaco-list-row .monaco-icon-label:before": "background-position: 0 bottom !important",
-    ".filematch .monaco-count-badge": "padding: 5px 6px 0 6px !important",
-    ".sidebar .title-label": "padding: 0 !important",
-    ".monaco-workbench .monaco-list:not(.element-focused):focus:before": "outline: none !important",
-    ".sidebar": "border: none !important",
-    ".quick-input-list-row div": "display: flex !important; align-items: center !important",
-    ".panel .composite.title": "visibility: hidden !important",
-    ".title.show-file-icons .label-container .monaco-icon-label.file-icon": "padding-bottom: 6px !important",
-    ".sidebar .title-label h2": "line-height: 2.8 !important",
-    ".monaco-editor .scroll-decoration": "display: none !important",
-    ".monaco-scrollable-element > .shadow.top": "display: none !important"
   },
-  "apc.font.size": 16,
-  "apc.activityBar": {
-    "size": 0
-  },
+  // Auto Docstring
+  "autoDocstring.docstringFormat": "numpy",
+  "autoDocstring.startOnNewLine": true,
+  "breadcrumbs.filePath": "on",
   // Editor
   "editor.bracketPairColorization.enabled": false,
   "editor.cursorBlinking": "solid",
   "editor.cursorSmoothCaretAnimation": "on",
   "editor.cursorStyle": "block",
+  "editor.defaultFormatter": "charliermarsh.ruff",
   "editor.foldingHighlight": true,
   "editor.fontFamily": "'RobotoMono Nerd Font Mono', monospace",
   "editor.fontLigatures": true,
@@ -64,168 +75,155 @@
   "editor.padding.top": 14,
   "editor.renderControlCharacters": true,
   "editor.renderWhitespace": "trailing",
+  "editor.rulers": [
+    88,
+    120
+  ],
+  "editor.stickyScroll.enabled": false,
   "editor.tabSize": 4,
   "editor.wordWrap": "off",
   "editor.wordWrapColumn": 88,
-  "editor.rulers": [88, 120],
-  "breadcrumbs.filePath": "on",
-  "editor.stickyScroll.enabled": false,
-  // Workbench
-  "workbench.editorAssociations": {
-    "*.ipynb": "jupyter-notebook",
-    "*.pdf": "default"
+  "errorLens.alignMessage": {
+    "end": 0,
+    "minimumMargin": 0,
+    "start": 88,
+    "useFixedPosition": true
   },
-  "workbench.startupEditor": "none",
-  "workbench.tips.enabled": false,
-  "workbench.colorTheme": "Catppuccin Frappé",
-  "workbench.iconTheme": "catppuccin-frappe",
-  "workbench.editor.tabSizing": "fixed",
-  "window.title": "",
-  "window.autoDetectColorScheme": false,
-  "window.titleBarStyle": "native",
-  "window.newWindowDimensions": "inherit",
-  "window.openFilesInNewWindow": "off",
-  "window.openFoldersInNewWindow": "on",
-  // Explorer / File Explorer
+  "errorLens.delayMode": "debounce",
+  "errorLens.margin": "10ch",
+  "errorLens.messageBackgroundMode": "none",
+  "errorLens.searchForProblemQuery": "",
+  // Explorer
+  "explorer.confirmDelete": false,
+  "explorer.confirmDragAndDrop": false,
+  "explorer.confirmPasteNative": false,
   "explorer.sortOrder": "type",
+  "files.associations": {
+    ".css": "tailwindcss"
+  },
   "files.defaultLanguage": "python",
   "files.insertFinalNewline": true,
   "files.trimFinalNewlines": true,
   "files.trimTrailingWhitespace": true,
-  "files.associations": {
-    ".css": "tailwindcss"
-  },
+  "git.autofetch": true,
   // Git
   "git.confirmSync": false,
-  "git.openRepositoryInParentFolders": "never",
-  "git.autofetch": true,
+  "git.decorations.enabled": false,
   "git.enableSmartCommit": true,
+  "git.openRepositoryInParentFolders": "never",
+  "github.copilot.editor.enableAutoCompletions": true,
   "github.copilot.enable": {
     "*": true,
-    "plaintext": true,
     "markdown": true,
+    "plaintext": true,
     "scminput": false
   },
-  // Minimal Mode
-  "zenMode.centerLayout": false,
-  "zenMode.fullScreen": false,
-  "zenMode.hideLineNumbers": false,
-  "zenMode.hideStatusBar": true,
-  "zenMode.silentNotifications": false,
-  // Terminal
-  "terminal.integrated.profiles.windows": {
-    "Nu": {
-      "path": "C:/Program Files/nu/bin/nu.exe",
-      "icon": "terminal-powershell"
+  "jupyter.askForKernelRestart": false,
+  "jupyter.enableExtendedPythonKernelCompletions": true,
+  "jupyter.experiments.optInto": [],
+  "jupyter.widgetScriptSources": [
+    "jsdelivr.com",
+    "unpkg.com"
+  ],
+  "mssql.connections": [
+    {
+      "applicationName": "vscode-mssql",
+      "authenticationType": "Integrated",
+      "commandTimeout": 30,
+      "connectTimeout": 15,
+      "database": "NEXAFS",
+      "encrypt": "Mandatory",
+      "password": "",
+      "server": "HDUVALLH",
+      "trustServerCertificate": true,
+      "user": ""
     }
+  ],
+  "mssql.enableQueryHistoryCapture": true,
+  "mssql.objectExplorer.groupBySchema": false,
+  "mypy-type-checker.importStrategy": "fromEnvironment",
+  "mypy-type-checker.preferDaemon": true,
+  "mypy-type-checker.reportingScope": "workspace",
+  "notebook.cellFocusIndicator": "border",
+  "notebook.cellToolbarLocation": {
+    "default": "right",
+    "jupyter-notebook": "left"
   },
-  "terminal.integrated.defaultProfile.windows": "Nu",
-  "terminal.integrated.gpuAcceleration": "auto",
-  "terminal.integrated.drawBoldTextInBrightColors": true,
-  "terminal.integrated.fontFamily": "'RobotoMono Nerd Font Mono', monospace",
-  "terminal.integrated.cursorBlinking": true,
-  "terminal.integrated.cursorStyle": "block",
-  "terminal.integrated.fontSize": 17,
-  "terminal.integrated.fontWeightBold": "bold",
-  "terminal.integrated.lineHeight": 1.2,
-  // Python
-  "python.terminal.activateEnvInCurrentTerminal": true,
+  // Jupyter\Notebook
+  "notebook.compactView": true,
+  "notebook.formatOnCellExecution": true,
+  "notebook.lineNumbers": "on",
+  "notebook.outline.showCodeCells": true,
   "python.condaPath": "${env.CONDA}",
   "python.defaultInterpreterPath": "${env.PYTHON}",
-  "[python]": {
-    "editor.defaultFormatter": "charliermarsh.ruff",
-    "editor.codeActionsOnSave": {
-      "source.organizeImports.ruff": "explicit",
-      "source.fixAll": "explicit",
-      "source.fixAll.eslint": "explicit"
-    },
-    "editor.formatOnSave": true
-  },
-  // Auto Docstring
-  "autoDocstring.docstringFormat": "numpy",
-  "autoDocstring.startOnNewLine": true,
+  // Python
+  "python.terminal.activateEnvInCurrentTerminal": true,
+  "ruff.configuration": "./pyproject.toml",
   // Ruff
   "ruff.enable": true,
-  "ruff.lint.run": "onSave",
-  "ruff.configuration": "./pyproject.toml",
+  "ruff.ignoreStandardLibrary": false,
   "ruff.interpreter": [
     "${workspaceFolder}\\.venv\\Scripts\\python.exe"
   ],
-  "ruff.ignoreStandardLibrary": false,
+  "ruff.lint.run": "onSave",
   "ruff.nativeServer": "off",
   "ruff.path": [
     "${workspaceFolder}\\.venv\\Scripts\\Scripts\\ruff.exe"
   ],
   "ruff.showNotifications": "always",
   "ruff.trace.server": "messages",
-  // Jupyter\Notebook
-  "notebook.compactView": true,
-  "notebook.cellToolbarLocation": {
-    "default": "right",
-    "jupyter-notebook": "left"
+  "security.workspace.trust.untrustedFiles": "open",
+  "terminal.integrated.cursorBlinking": true,
+  "terminal.integrated.cursorStyle": "block",
+  "terminal.integrated.defaultProfile.windows": "Nu",
+  "terminal.integrated.drawBoldTextInBrightColors": true,
+  "terminal.integrated.enableMultiLinePasteWarning": false,
+  "terminal.integrated.fontFamily": "'RobotoMono Nerd Font Mono', monospace",
+  "terminal.integrated.fontSize": 17,
+  "terminal.integrated.fontWeightBold": "bold",
+  "terminal.integrated.gpuAcceleration": "auto",
+  "terminal.integrated.lineHeight": 1.2,
+  // Terminal
+  "terminal.integrated.profiles.windows": {
+    "Nu": {
+      "icon": "terminal-powershell",
+      "path": "C:/Program Files/nu/bin/nu.exe"
+    }
   },
-  "notebook.outline.showCodeCells": true,
-  "notebook.formatOnCellExecution": true,
+  // touchbar
+  "touchBar.copyLinesDownAction": false,
+  "touchBar.extensions": false,
+  "touchBar.foldAll": true,
+  "touchBar.rename": false,
+  "touchBar.terminal": true,
   // GitLens
   "typescript.updateImportsOnFileMove.enabled": "always",
-  "explorer.confirmDelete": false,
-  "security.workspace.trust.untrustedFiles": "open",
-  "workbench.layoutControl.enabled": false,
-  "window.commandCenter": false,
-  "notebook.lineNumbers": "on",
-  "notebook.cellFocusIndicator": "border",
-  "errorLens.delayMode": "debounce",
-  "errorLens.margin": "10ch",
-  "errorLens.messageBackgroundMode": "none",
-  "errorLens.searchForProblemQuery": "",
-  "errorLens.alignMessage": {
-    "start": 88,
-    "end": 0,
-    "minimumMargin": 0,
-    "useFixedPosition": true
-  },
-  "window.customTitleBarVisibility": "auto",
-  "jupyter.enableExtendedPythonKernelCompletions": true,
-  "editor.defaultFormatter": "charliermarsh.ruff",
-  "jupyter.experiments.optInto": [],
-  "jupyter.widgetScriptSources": ["jsdelivr.com", "unpkg.com"],
-  "jupyter.askForKernelRestart": false,
-  "[rust]": {
-    "editor.defaultFormatter": "rust-lang.rust-analyzer"
-  },
-  "github.copilot.editor.enableAutoCompletions": true,
   "update.mode": "manual",
-  "[typescriptreact]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  "window.autoDetectColorScheme": false,
+  "window.commandCenter": false,
+  "window.customTitleBarVisibility": "never",
+  "window.newWindowDimensions": "inherit",
+  "window.openFilesInNewWindow": "off",
+  "window.openFoldersInNewWindow": "on",
+  "window.titleBarStyle": "native",
+  "workbench.colorTheme": "Catppuccin Frappé",
+  "workbench.editor.tabSizing": "fixed",
+  "workbench.editor.tabHeight": "normal",
+  "workbench.editorAssociations": {
+    "*.ipynb": "jupyter-notebook",
+    "*.pdf": "default"
   },
-  "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "mssql.objectExplorer.groupBySchema": false,
-  "mssql.connections": [
-    {
-      "server": "HDUVALLH",
-      "database": "NEXAFS",
-      "authenticationType": "Integrated",
-      "encrypt": "Mandatory",
-      "trustServerCertificate": true,
-      "user": "",
-      "password": "",
-      "connectTimeout": 15,
-      "commandTimeout": 30,
-      "applicationName": "vscode-mssql"
-    }
-  ],
-  "[sql]": {
-    "editor.defaultFormatter": "ms-mssql.mssql"
-  },
-  "mssql.enableQueryHistoryCapture": true,
-  "explorer.confirmPasteNative": false,
-  "explorer.confirmDragAndDrop": false,
-  "terminal.integrated.enableMultiLinePasteWarning": false,
+  "workbench.iconTheme": "catppuccin-frappe",
+  "workbench.layoutControl.enabled": false,
+  "workbench.startupEditor": "none",
   "workbench.statusBar.visible": false,
-  "mypy-type-checker.importStrategy": "fromEnvironment",
-  "mypy-type-checker.preferDaemon": true,
-  "mypy-type-checker.reportingScope": "workspace",
-  "window.density.editorTabHeight": "compact",
+  "workbench.tips.enabled": false,
+  // Minimal Mode
+  "zenMode.centerLayout": false,
+  "zenMode.fullScreen": false,
+  "zenMode.hideLineNumbers": false,
+  "zenMode.hideStatusBar": true,
+  "zenMode.silentNotifications": false,
+  "workbench.activityBar.location": "hidden",
+  "workbench.editor.titleScrollbarSizing": "large"
 }
