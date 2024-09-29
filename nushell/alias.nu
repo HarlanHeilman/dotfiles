@@ -12,7 +12,7 @@ export def ls [path?] {
 }
 
 # git
-export def gc  [args] { git add .; git commit -m $args; git push }
+export def gc  [args] { git add . ; git commit -m $args; git push }
 
 
 # fzf
@@ -25,9 +25,10 @@ export alias grep = rg
 export alias df = duf
 export alias cat = bat
 export alias dig = dog
+export alias grep = rg
 
 # python virtualenv
-export alias py = python
+export alias py = .venv\Scripts\python.exe
 
 # uv
 export alias activate = .venv\Scripts\activate
@@ -40,3 +41,11 @@ export alias dot = cd $env.DOTFILES
 export alias sp = cd $env.SP
 export alias spu = cd $env.SP_USER
 export alias spd = cd $env.SP_DATA
+
+# rust
+export def bump [] {
+  open Cargo.toml | upsert package.version { |p| $p | get package.version | inc --patch } | save -f Cargo.toml
+}
+export def pub [] {
+  bump | gc "Version bump" |cargo doc -q | cargo publish -q
+}

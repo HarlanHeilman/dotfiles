@@ -46,5 +46,12 @@ $env.NU_PLUGIN_DIRS = [
     ($nu.default-config-dir | path join 'plugins') # add <nushell-config-dir>/plugins
 ]
 
+# Rust environment variables
+$env.POLARS_VERBOSE = 1
+$env.RUST_BACKTRACE = "full"
+$env.RUST_LOG = "warn"
+$env.CARGO_PROFILE_RELEASE_BUILD_OVERRIDE_DEBUG = true
+
+
 source ~/.dotfiles/starship/init.nu
 source ~/.dotfiles/fzf/init.nu

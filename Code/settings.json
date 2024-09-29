@@ -60,7 +60,7 @@
   "editor.cursorStyle": "block",
   "editor.defaultFormatter": "charliermarsh.ruff",
   "editor.foldingHighlight": true,
-  "editor.fontFamily": "'RobotoMono Nerd Font Mono', monospace",
+  "editor.fontFamily": "'Fira Code'",
   "editor.fontLigatures": true,
   "editor.fontSize": 17,
   "editor.formatOnSave": true,
@@ -118,6 +118,34 @@
     "plaintext": true,
     "scminput": false
   },
+  "github.copilot.chat.customUserInstructions": [
+    "Allways think though the question, analyse the current code base and understand the context before editing the code.",
+    "Functions should be pure",
+    "Functions should have no side effects",
+    "Data should be immutable",
+    "Refferential transparency is key",
+    "Functions should be first class entities",
+    "Higher order functions, mutexes, and closures are key",
+    "Prefer to use a diciplined transparent, and immutable state",
+    "Allways prefer docstrings over comments.",
+    "Allways prefer data classes and named tuples over dictionaries.",
+    "If a functional programming approach is possible, prefer it over objects, data classes are aceptable.",
+    "If an object is not nescescarry, avoid it, use a function, data class, named tuple, or overload a built-in Object.",
+    "Prefer to use use errors as a way to control the flow of the program, similar to the rust programming language.",
+    "If an object is nescescarry, ensure that it follows the principles of OOP.",
+    "For python docstring in the numpy format is preferred.",
+    "Allways use a max line length of 80 characters no matter the coding language.",
+    "Allways prefer to use the type hinting feature of python.",
+    "Allways prefer to use the built-in functions of python over custom functions.",
+    "Allways write code that is easy to read and understand.",
+    "Allways take inspiration from the Zen of Python.",
+    "Allways take inspiration from the PEP8 style guide.",
+    "Allways take inspiration from rust and go programming languages.",
+    "Whenever possible use numba for performance critical code.",
+    "Allways prefer to use polars over pandas for data manipulation.",
+    "Allways prefer seaborn over matplotlib for data visualization.",
+    "Allways prefer numpy over built-in python functions for numerical operations.",
+  ],
   "jupyter.askForKernelRestart": false,
   "jupyter.enableExtendedPythonKernelCompletions": true,
   "jupyter.experiments.optInto": [],
@@ -154,8 +182,8 @@
   "notebook.formatOnCellExecution": true,
   "notebook.lineNumbers": "on",
   "notebook.outline.showCodeCells": true,
-  "python.condaPath": "${env.CONDA}",
-  "python.defaultInterpreterPath": "${env.PYTHON}",
+"python.condaPath": "${env.CONDA}",
+  "python.defaultInterpreterPath": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
   // Python
   "python.terminal.activateEnvInCurrentTerminal": true,
   "ruff.configuration": "./pyproject.toml",
@@ -177,7 +205,7 @@
   "terminal.integrated.cursorStyle": "block",
   "terminal.integrated.defaultProfile.windows": "Nu",
   "terminal.integrated.drawBoldTextInBrightColors": true,
-  "terminal.integrated.enableMultiLinePasteWarning": false,
+  "terminal.integrated.enableMultiLinePasteWarning": "never",
   "terminal.integrated.fontFamily": "'RobotoMono Nerd Font Mono', monospace",
   "terminal.integrated.fontSize": 17,
   "terminal.integrated.fontWeightBold": "bold",
@@ -187,7 +215,7 @@
   "terminal.integrated.profiles.windows": {
     "Nu": {
       "icon": "terminal-powershell",
-      "path": "C:/Program Files/nu/bin/nu.exe"
+      "path": "C:Users/hduva/.cargo/bin/nu.exe"
     }
   },
   // touchbar
@@ -210,8 +238,10 @@
   "workbench.editor.tabSizing": "fixed",
   "workbench.editor.tabHeight": "normal",
   "workbench.editorAssociations": {
+    "{git,gitlens,conflictResolution,vscode-local-history}:/**/*.tc.json": "default",
     "*.ipynb": "jupyter-notebook",
-    "*.pdf": "default"
+    "*.pdf": "default",
+    "*.h5xp": "default"
   },
   "workbench.iconTheme": "catppuccin-frappe",
   "workbench.layoutControl.enabled": false,
@@ -225,5 +255,10 @@
   "zenMode.hideStatusBar": true,
   "zenMode.silentNotifications": false,
   "workbench.activityBar.location": "hidden",
-  "workbench.editor.titleScrollbarSizing": "large"
+  "workbench.editor.titleScrollbarSizing": "large",
+  "rust-analyzer.rustfmt.overrideCommand": null,
+  "debug.allowBreakpointsEverywhere": true,
+  "[toml]": {
+    "editor.defaultFormatter": "be5invis.toml"
+  }
 }

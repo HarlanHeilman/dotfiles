@@ -14,21 +14,44 @@
         "command": "explorer.newFile"
     },
     {
-        "key": "ctrl+f",
-        "command": "workbench.action.gotoSymbol",
-        "when": "!accessibilityHelpIsShown && !accessibleViewIsShown"
-    },
-    {
-        "key": "ctrl+shift+f",
-        "command": "workbench.action.gotoLine",
-        "when": "!accessibilityHelpIsShown && !accessibleViewIsShown"
-    },
-    {
         "key": "ctrl+shift+`",
         "command": "prettier.openOutput"
     },
     {
         "key": "ctrl+shift+`",
         "command": "ruff.showLogs"
+    },
+    {
+        "key": "ctrl+/",
+        "command": "-editor.action.accessibleViewAcceptInlineCompletion",
+        "when": "accessibleViewIsShown && accessibleViewCurrentProviderId == 'inlineCompletions'"
+    },
+    {
+        "key": "ctrl+/",
+        "command": "-github.copilot.acceptCursorPanelSolution",
+        "when": "github.copilot.activated && github.copilot.panelVisible && activeWebviewPanelId == 'GitHub Copilot Suggestions'"
+    },
+    {
+        "key": "ctrl+/",
+        "command": "-toggleExplainMode",
+        "when": "suggestWidgetVisible"
+    },
+    {
+        "key": "ctrl+/",
+        "command": "-workbench.action.chat.attachContext",
+        "when": "config.chat.experimental.variables.editor && inChatInput && chatLocation == 'editor' || config.chat.experimental.variables.notebook && inChatInput && chatLocation == 'notebook' || config.chat.experimental.variables.terminal && inChatInput && chatLocation == 'terminal' || inChatInput && !quickChatHasFocus && chatLocation == 'panel'"
+    },
+    {
+        "key": "ctrl+/",
+        "command": "-workbench.action.terminal.sendSequence",
+        "when": "terminalFocus"
+    },
+    {
+        "key": "ctrl+shift+/",
+        "command": "phantom-note.addComment"
+    },
+    {
+        "key": "shift+alt+/",
+        "command": "phantom-note.deleteComment"
     }
 ]
