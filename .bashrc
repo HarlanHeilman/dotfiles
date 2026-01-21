@@ -1,79 +1,146 @@
-export PATH="~/.local/bin:$PATH"
-export PATH="~/.cargo/bin:$PATH"
-export PATH="/bin/stobe/Source/:$PATH"
-export PATH="/opt/nvim-linux64/bin:$PATH"
+#!/usr/bin/env bash
 
-source /opt/intel/oneapi/setvars.sh > /dev/null
+_OS="unknown"
+case "$OSTYPE" in
+    darwin*)  _OS="macos" ;;
+    linux*)   _OS="linux" ;;
+    msys*|cygwin*) _OS="windows" ;;
+esac
 
-eval "$(oh-my-posh init bash --config /home/hduva/dotfiles/catppuccin/catppuccin_frappe.omp.json)"
-# ============/ JCMWAVE /============
-export JCMROOT="/home/hduva/.jcmwave/"
-export JCMPYTHON=$JCMROOT"ThirdPartySupport/python/"
-export PYTHONPATH=${PYTHONPATH}:${JCMPYTHON}
-export PATH="${PATH}:~/.jcmwave/bin"
-# ============/ Aliases /============
-vscode() {
-    code $1
-}
-c() {
-    zed $1
-}
-vim() {
-  nvim $1
-}
+export DOTFILES="$HOME/dotfiles"
+export PROJECTS="$HOME/projects"
 
-# ============/ AWS / ============
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.cargo/bin:$PATH"
+
+if [[ "$_OS" == "macos" ]]; then
+    export PATH="/opt/homebrew/bin:$PATH"
+    export PATH="/opt/homebrew/sbin:$PATH"
+    
+    if [[ -f "/opt/homebrew/bin/brew" ]]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    fi
+fi
+
+if [[ "$_OS" == "linux" ]]; then
+    export PATH="/opt/nvim-linux64/bin:$PATH"
+    
+    if [[ -f "/opt/intel/oneapi/setvars.sh" ]]; then
+        source /opt/intel/oneapi/setvars.sh > /dev/null 2>&1
+    fi
+    
+    if [[ -d "/bin/stobe/Source" ]]; then
+        export PATH="/bin/stobe/Source:$PATH"
+        export STOBE="/bin/stobe/"
+        export STOBE_BASIS="${STOBE}Basis/"
+        alias dft='rm -rf *.inp && rm -rf *.out && chmod +x **.run && ./${PWD##*/}gnd.run && ./${PWD##*/}exc.run && ./${PWD##*/}tp.run && ./${PWD##*/}xas.run'
+    fi
+    
+    if [[ -d "$HOME/.jcmwave" ]]; then
+        export JCMROOT="$HOME/.jcmwave/"
+        export JCMPYTHON="${JCMROOT}ThirdPartySupport/python/"
+        export PYTHONPATH="${PYTHONPATH}:${JCMPYTHON}"
+        export PATH="${PATH}:$HOME/.jcmwave/bin"
+    fi
+fi
+
+if [[ -d "$HOME/.bun" ]]; then
+    export BUN_INSTALL="$HOME/.bun"
+    export PATH="$BUN_INSTALL/bin:$PATH"
+fi
+
+if [[ -f "$HOME/.local/bin/env" ]]; then
+    source "$HOME/.local/bin/env"
+fi
+
+if [[ -f "$HOME/.cargo/env" ]]; then
+    source "$HOME/.cargo/env"
+fi
+
+export POLARS_VERBOSE=1
+export RUST_BACKTRACE="full"
+export RUST_LOG="warn"
+export CARGO_PROFILE_RELEASE_BUILD_OVERRIDE_DEBUG=true
 
 export AWS_DEFAULT_PROFILE='lbl'
 
-# ============/ Bash /============
-alias ls='ls -a --color=auto'
-alias refresh='source ~/.bashrc && clear'
-alias edit='vim ~/.bashrc $$ refresh'
+HISTCONTROL=ignoreboth
+shopt -s histappend
+HISTSIZE=100000
+HISTFILESIZE=200000
 
-# ============/ StoBe /============
-export STOBE="/bin/stobe/"
-export STOBE_BASIS=${STOBE}Basis/
-alias dft='rm -rf *.inp && rm -rf *.out && chmod +x **.run && ./${PWD##*/}gnd.run && ./${PWD##*/}exc.run && ./${PWD##*/}tp.run && ./${PWD##*/}xas.run'
+shopt -s checkwinsize
 
-# ===========/obable/=============
+export STARSHIP_CONFIG="$DOTFILES/starship/starship.toml"
+if command -v starship &> /dev/null; then
+    eval "$(starship init bash)"
+fi
 
-smiles() {
-    local smiles="$1"
+if [[ -f "$DOTFILES/fzf/init.sh" ]]; then
+    source "$DOTFILES/fzf/init.sh"
+fi
 
-    # Run obabel to get SVG and InChI outputs
-    svg=$(obabel -:"$smiles" -o svg 2>/dev/null)
-    inchi=$(obabel -:"$smiles" -o inchi 2>/dev/null)
-
-    # Flatten the SVG by removing newlines
-    flattened_svg=$(echo "$svg" | tr -d '\n')
-
-    # Escape all double quotes in the SVG
-#    escaped_svg=$(echo "$flattened_svg" | sed 's/"/\\"/g')
-
-    # Print the results
-    output="\"image\" : \"$flattened_svg\",\n\"SMILES\": \"$smiles\",\n\"InChI\" : \"$inchi\","
-    echo "$output"
-    # Copy the output to the clipboard
-    if command -v pbcopy &> /dev/null; then
-        # macOS
-        echo -e "$output" | pbcopy
-    elif command -v xclip &> /dev/null; then
-        # Linux with xclip
-        echo -e "$output" | xclip -selection clipboard
-    elif command -v xsel &> /dev/null; then
-        # Linux with xsel
-        echo -e "$output" | xsel --clipboard --input
-    else
-        echo "No clipboard utility found. Install pbcopy (macOS), xclip, or xsel (Linux) to copy to clipboard."
+if command -v fzf &> /dev/null; then
+    if [[ "$_OS" == "macos" ]]; then
+        if [[ -f "/opt/homebrew/opt/fzf/shell/completion.bash" ]]; then
+            source "/opt/homebrew/opt/fzf/shell/completion.bash"
+        fi
+        if [[ -f "/opt/homebrew/opt/fzf/shell/key-bindings.bash" ]]; then
+            source "/opt/homebrew/opt/fzf/shell/key-bindings.bash"
+        fi
+    elif [[ "$_OS" == "linux" ]]; then
+        if [[ -f "/usr/share/fzf/completion.bash" ]]; then
+            source "/usr/share/fzf/completion.bash"
+        fi
+        if [[ -f "/usr/share/fzf/key-bindings.bash" ]]; then
+            source "/usr/share/fzf/key-bindings.bash"
+        fi
+        if [[ -f "/usr/share/bash-completion/completions/fzf" ]]; then
+            source "/usr/share/bash-completion/completions/fzf"
+        fi
     fi
-    echo "JSON output copied to clipboard"
-}
+fi
 
+if [[ "$_OS" == "macos" ]]; then
+    alias ls='ls -G'
+else
+    if [[ -x /usr/bin/dircolors ]]; then
+        test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+    fi
+    alias ls='ls --color=auto'
+fi
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
 
-# ============/ Git /============
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+
+if command -v rg &> /dev/null; then
+    alias rg='rg --smart-case'
+fi
+
+if command -v bat &> /dev/null; then
+    alias cat='bat --style=plain'
+    alias catp='bat'
+fi
+
+if command -v eza &> /dev/null; then
+    alias tree='eza --tree --level=2 --icons --group-directories-first'
+    alias tree3='eza --tree --level=3 --icons --group-directories-first'
+    alias lx='eza -la --icons --group-directories-first --git'
+fi
+
+alias vim='nvim'
+alias v='nvim'
+alias c='zed'
+
+alias dot='cd $DOTFILES'
+alias proj='cd $PROJECTS'
+
 gc() {
-    if [ -z "$1" ]; then
+    if [[ -z "$1" ]]; then
         echo "Commit message is required"
         return 1
     fi
@@ -83,123 +150,78 @@ gc() {
     git push
 }
 
-# ============/ Python /============
-export alias activate='source ./.venv/bin/activate'
-export alias build='activate && cargo update && maturin develop --uv'
-export alias pip='uv pip'
-export alias py='python3'
+alias gs='git status'
+alias gd='git diff'
+alias gl='git log --oneline -n 20'
+alias gp='git pull'
+
+alias py='python3'
+alias pip='uv pip'
+
 venv() {
-    if [ ! -d ".venv" ]; then
+    if [[ ! -d ".venv" ]]; then
         uv venv
     fi
     source ./.venv/bin/activate
 }
 
+alias activate='source ./.venv/bin/activate'
 alias build='venv && maturin develop --uv'
 
-HISTCONTROL=ignoreboth
-
-# append to the history file, don't overwrite it
-shopt -s histappend
-
-# for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
-HISTSIZE=1000
-HISTFILESIZE=2000
-
-# check the window size after each command and, if necessary,
-# update the values of LINES and COLUMNS.
-shopt -s checkwinsize
-
-# If set, the pattern "**" used in a pathname expansion context will
-# match all files and zero or more directories and subdirectories.
-#shopt -s globstar
-
-# make less more friendly for non-text input files, see lesspipe(1)
-[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
-
-# set variable identifying the chroot you work in (used in the prompt below)
-if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
-    debian_chroot=$(cat /etc/debian_chroot)
-fi
-
-# set a fancy prompt (non-color, unless we know we "want" color)
-case "$TERM" in
-    xterm-color|*-256color) color_prompt=yes;;
-esac
-
-# uncomment for a colored prompt, if the terminal has the capability; turned
-# off by default to not distract the user: the focus in a terminal window
-# should be on the output of commands, not on the prompt
-#force_color_prompt=yes
-
-if [ -n "$force_color_prompt" ]; then
-    if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
-	# We have color support; assume it's compliant with Ecma-48
-	# (ISO/IEC-6429). (Lack of such support is extremely rare, and such
-	# a case would tend to support setf rather than setaf.)
-	color_prompt=yes
+smiles() {
+    local smiles_str="$1"
+    
+    if ! command -v obabel &> /dev/null; then
+        echo "obabel not found. Install open-babel first."
+        return 1
+    fi
+    
+    local svg=$(obabel -:"$smiles_str" -o svg 2>/dev/null)
+    local inchi=$(obabel -:"$smiles_str" -o inchi 2>/dev/null)
+    local flattened_svg=$(echo "$svg" | tr -d '\n')
+    
+    local output="\"image\" : \"$flattened_svg\",\n\"SMILES\": \"$smiles_str\",\n\"InChI\" : \"$inchi\","
+    echo "$output"
+    
+    if [[ "$_OS" == "macos" ]]; then
+        echo -e "$output" | pbcopy
+    elif command -v xclip &> /dev/null; then
+        echo -e "$output" | xclip -selection clipboard
+    elif command -v xsel &> /dev/null; then
+        echo -e "$output" | xsel --clipboard --input
     else
-	color_prompt=
+        echo "No clipboard utility found"
+        return 0
+    fi
+    echo "JSON output copied to clipboard"
+}
+
+if [[ "$_OS" == "linux" ]]; then
+    if [[ -z "${debian_chroot:-}" ]] && [[ -r /etc/debian_chroot ]]; then
+        debian_chroot=$(cat /etc/debian_chroot)
+    fi
+    
+    if [[ -x /usr/bin/lesspipe ]]; then
+        eval "$(SHELL=/bin/sh lesspipe)"
+    fi
+    
+    if ! shopt -oq posix; then
+        if [[ -f /usr/share/bash-completion/bash_completion ]]; then
+            source /usr/share/bash-completion/bash_completion
+        elif [[ -f /etc/bash_completion ]]; then
+            source /etc/bash_completion
+        fi
+    fi
+    
+    if command -v notify-send &> /dev/null; then
+        alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
     fi
 fi
 
-if [ "$color_prompt" = yes ]; then
-    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
-else
-    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
+alias refresh='source ~/.bashrc && clear'
+alias edit='nvim ~/.bashrc && refresh'
+alias edot='nvim $DOTFILES/.bashrc && refresh'
+
+if [[ -f ~/.bash_aliases ]]; then
+    source ~/.bash_aliases
 fi
-unset color_prompt force_color_prompt
-
-# If this is an xterm set the title to user@host:dir
-case "$TERM" in
-xterm*|rxvt*)
-    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
-    ;;
-*)
-    ;;
-esac
-
-# enable color support of ls and also add handy aliases
-if [ -x /usr/bin/dircolors ]; then
-    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-    alias ls='ls --color=auto'
-    #alias dir='dir --color=auto'
-    #alias vdir='vdir --color=auto'
-
-    alias grep='grep --color=auto'
-    alias fgrep='fgrep --color=auto'
-    alias egrep='egrep --color=auto'
-fi
-
-# colored GCC warnings and errors
-#export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
-
-# some more ls aliases
-alias ll='ls -alF'
-alias la='ls -A'
-alias l='ls -CF'
-
-# Add an "alert" alias for long running commands.  Use like so:
-#   sleep 10; alert
-alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
-
-# Alias definitions.
-# You may want to put all your additions into a separate file like
-# ~/.bash_aliases, instead of adding them here directly.
-# See /usr/share/doc/bash-doc/examples in the bash-doc package.
-
-if [ -f ~/.bash_aliases ]; then
-    . ~/.bash_aliases
-fi
-
-# enable programmable completion features (you don't need to enable
-# this, if it's already enabled in /etc/bash.bashrc and /etc/profile
-# sources /etc/bash.bashrc).
-if ! shopt -oq posix; then
-  if [ -f /usr/share/bash-completion/bash_completion ]; then
-    . /usr/share/bash-completion/bash_completion
-  elif [ -f /etc/bash_completion ]; then
-    . /etc/bash_completion
-  fi
-fi
-. "$HOME/.cargo/env"

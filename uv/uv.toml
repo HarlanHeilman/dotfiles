@@ -1,5 +1,4 @@
 [pip]
-python-preference=only-managed
 all-extras = true
 compile-bytecode = true
 config-settings = { editable_mode = "compat" }

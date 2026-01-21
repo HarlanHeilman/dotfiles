@@ -1,0 +1,186 @@
+"$schema" = "https://starship.rs/config-schema.json"
+
+format = """
+$python\
+$rust\
+$nodejs\
+$username\
+$hostname\
+$directory\
+$git_branch\
+$git_state\
+$git_status\
+$fill\
+$cmd_duration\
+$line_break\
+$character"""
+
+add_newline = true
+
+palette = "catppuccin_frappe"
+
+[palettes.catppuccin_frappe]
+rosewater = "#f2d5cf"
+flamingo = "#eebebe"
+pink = "#f4b8e4"
+mauve = "#ca9ee6"
+red = "#e78284"
+maroon = "#ea999c"
+peach = "#ef9f76"
+yellow = "#e5c890"
+green = "#a6d189"
+teal = "#81c8be"
+sky = "#99d1db"
+sapphire = "#85c1dc"
+blue = "#8caaee"
+lavender = "#babbf1"
+text = "#c6d0f5"
+subtext1 = "#b5bfe2"
+subtext0 = "#a5adce"
+overlay2 = "#949cbb"
+overlay1 = "#838ba7"
+overlay0 = "#737994"
+surface2 = "#626880"
+surface1 = "#51576d"
+surface0 = "#414559"
+base = "#303446"
+mantle = "#292c3c"
+crust = "#232634"
+
+[fill]
+symbol = " "
+
+[character]
+success_symbol = "[>](bold green)"
+error_symbol = "[>](bold red)"
+vimcmd_symbol = "[<](bold mauve)"
+vimcmd_replace_one_symbol = "[<](bold peach)"
+vimcmd_replace_symbol = "[<](bold peach)"
+vimcmd_visual_symbol = "[<](bold yellow)"
+
+[username]
+style_user = "blue"
+style_root = "bold red"
+format = "[$user]($style)"
+show_always = false
+
+[hostname]
+ssh_only = false
+style = "blue"
+format = "[@$hostname]($style) "
+
+[directory]
+style = "pink"
+read_only_style = "red"
+truncation_length = 4
+truncation_symbol = ".../"
+truncate_to_repo = true
+home_symbol = "~"
+format = "[$path]($style)[$read_only]($read_only_style) "
+
+[git_branch]
+symbol = ""
+style = "lavender"
+format = "[$symbol $branch]($style)"
+
+[git_state]
+style = "yellow"
+format = "[ $state( $progress_current/$progress_total)]($style) "
+
+[git_status]
+style = "overlay1"
+format = "[$all_status$ahead_behind]($style) "
+conflicted = " =${count}"
+ahead = " ${count}"
+behind = " ${count}"
+diverged = " ${ahead_count} ${behind_count}"
+untracked = " ?${count}"
+stashed = " *${count}"
+modified = " !${count}"
+staged = " +${count}"
+renamed = " r${count}"
+deleted = " x${count}"
+
+[python]
+symbol = ""
+style = "yellow"
+format = "[($symbol $version \\($virtualenv\\) )]($style)"
+detect_extensions = []
+detect_files = [".python-version", "pyproject.toml"]
+detect_folders = [".venv"]
+
+[rust]
+symbol = ""
+style = "peach"
+format = "[($symbol $version )]($style)"
+
+[nodejs]
+symbol = ""
+style = "green"
+format = "[($symbol $version )]($style)"
+detect_extensions = []
+detect_files = ["package.json"]
+
+[golang]
+symbol = ""
+style = "sky"
+format = "[($symbol $version )]($style)"
+
+[cmd_duration]
+min_time = 500
+style = "overlay1"
+format = "[$duration]($style)"
+
+[line_break]
+disabled = false
+
+[package]
+disabled = true
+
+[aws]
+disabled = true
+
+[gcloud]
+disabled = true
+
+[azure]
+disabled = true
+
+[docker_context]
+disabled = true
+
+[kubernetes]
+disabled = true
+
+[terraform]
+disabled = true
+
+[vagrant]
+disabled = true
+
+[nix_shell]
+disabled = true
+
+[memory_usage]
+disabled = true
+
+[battery]
+disabled = true
+
+[time]
+disabled = true
+
+[status]
+disabled = true
+
+[jobs]
+disabled = true
+
+[shlvl]
+disabled = true
+
+[singularity]
+disabled = true
+
+[env_var]
+disabled = true
