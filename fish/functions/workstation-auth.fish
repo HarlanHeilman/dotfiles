@@ -1,9 +1,16 @@
 function workstation-auth --description 'Get a 1-day SSH cert to connect to the workstation (account password once)'
     set -l user_key $HOME/.ssh/workstation
-    set -l host $WORKSTATION_SSH_HOST
-    set -l remote_user $WORKSTATION_SSH_USER
+    set -l host hduva
+    set -l remote_user hduva
     set -l client_setup $HOME/.local/bin/workstation-client-setup
     set -l remote_sign '$HOME/.local/bin/workstation-sign'
+
+    if set -q WORKSTATION_SSH_HOST; and test -n "$WORKSTATION_SSH_HOST"
+        set host $WORKSTATION_SSH_HOST
+    end
+    if set -q WORKSTATION_SSH_USER; and test -n "$WORKSTATION_SSH_USER"
+        set remote_user $WORKSTATION_SSH_USER
+    end
 
     if test -x $client_setup
         $client_setup

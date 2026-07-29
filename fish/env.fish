@@ -1,7 +1,11 @@
 set -gx PROJECTS "$HOME/projects"
 
-set -gx WORKSTATION_SSH_HOST hduva
-set -gx WORKSTATION_SSH_USER hduva
+if not set -q WORKSTATION_SSH_HOST; or test -z "$WORKSTATION_SSH_HOST"
+    set -gx WORKSTATION_SSH_HOST hduva
+end
+if not set -q WORKSTATION_SSH_USER; or test -z "$WORKSTATION_SSH_USER"
+    set -gx WORKSTATION_SSH_USER hduva
+end
 
 set -gx DISABLE_NON_ESSENTIAL_MODEL_CALLS 1
 set -gx DISABLE_TELEMETRY 1
