@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DOTFILES="${DOTFILES:-$HOME/dotfiles}"
+SRC_DIR="$DOTFILES/ssh/config.d"
+SSH_DIR="$HOME/.ssh"
+CONFIG_D="$SSH_DIR/config.d"
+CONFIG="$SSH_DIR/config"
+INCLUDE_LINE='Include config.d/*.conf'
+
+mkdir -p "$SSH_DIR" "$CONFIG_D"
+chmod 700 "$SSH_DIR"
+
+if [[ ! -d "$SRC_DIR" ]]; then
+    echo "workstation-client-setup: missing $SRC_DIR" >&2
+    echo "Clone/install dotfiles first." >&2
+    exit 1
+fi
+
+shopt -s nullglob
+for src in "$SRC_DIR"/*.conf; do
+    base="$(basename "$src")"
+    dest="$CONFIG_D/$base"
+    if [[ -L "$dest" || -e "$dest" ]]; then
+        if [[ -L "$dest" && "$(readlink "$dest")" == "$src" ]]; then
+            continue
+        fi
+        backup="$dest.backup.$(date +%Y%m%d_%H%M%S)"
+        mv "$dest" "$backup"
+        echo "Backed up $dest -> $backup"
+    fi
+    ln -s "$src" "$dest"
+    echo "Linked $dest -> $src"
+done
+
+if [[ ! -f "$CONFIG" ]]; then
+    printf '%s\n' "$INCLUDE_LINE" >"$CONFIG"
+    chmod 600 "$CONFIG"
+    echo "Created $CONFIG with Include"
+elif ! grep -qE '^[[:space:]]*Include[[:space:]]+config\.d/\*\.conf[[:space:]]*$' "$CONFIG"; then
+    tmp="$(mktemp)"
+    {
+        printf '%s\n\n' "$INCLUDE_LINE"
+        cat "$CONFIG"
+    } >"$tmp"
+    mv "$tmp" "$CONFIG"
+    chmod 600 "$CONFIG"
+    echo "Prepended Include to $CONFIG"
+else
+    echo "Include already present in $CONFIG"
+fi
+
+mkdir -p "$HOME/.local/bin"
+for script in workstation-sign workstation-ca-setup workstation-client-setup; do
+    src="$DOTFILES/bin/$script"
+    dest="$HOME/.local/bin/$script"
+    if [[ -f "$src" ]]; then
+        ln -sfn "$src" "$dest"
+    fi
+done
+
+echo "Client SSH handshake ready."
+echo "Mint a 1-day cert with: workstation-auth"
+echo "Then connect with: ssh hduva"

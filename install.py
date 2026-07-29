@@ -19,6 +19,7 @@ from __future__ import annotations
 import argparse
 import os
 import platform
+import re
 import shutil
 import subprocess
 import sys
@@ -236,6 +237,128 @@ def install_dependencies(config: Config) -> None:
             log_warning("No supported package manager found")
     else:
         log_warning(f"Dependency installation not supported on {detected_os.value}")
+
+
+def setup_bin_scripts(dotfiles: Path, home: Path, config: Config) -> None:
+    """Symlink executable helpers from ``dotfiles/bin`` into ``~/.local/bin``.
+
+    Parameters
+    ----------
+    dotfiles : Path
+        Root of the dotfiles repository.
+    home : Path
+        User home directory.
+    config : Config
+        Installer configuration.
+
+    Returns
+    -------
+    None
+        Side effect only: creates symlinks for each executable script.
+    """
+    bin_dir = dotfiles / "bin"
+    if not bin_dir.is_dir():
+        return
+
+    local_bin = home / ".local" / "bin"
+    if not config.dry_run:
+        local_bin.mkdir(parents=True, exist_ok=True)
+
+    for script in sorted(bin_dir.iterdir()):
+        if not script.is_file():
+            continue
+        if not os.access(script, os.X_OK):
+            if not config.dry_run:
+                script.chmod(script.stat().st_mode | 0o111)
+        create_symlink(script, local_bin / script.name, config)
+
+
+def ensure_ssh_config_include(ssh_config: Path, config: Config) -> None:
+    """Ensure ``~/.ssh/config`` includes ``config.d/*.conf`` fragments.
+
+    Parameters
+    ----------
+    ssh_config : Path
+        Path to the user OpenSSH config file.
+    config : Config
+        Installer configuration.
+
+    Returns
+    -------
+    None
+        Side effect only: creates or prepends an Include directive.
+    """
+    include_line = "Include config.d/*.conf"
+    include_re = re.compile(r"^\s*Include\s+config\.d/\*\.conf\s*$")
+
+    if config.dry_run:
+        if not ssh_config.exists():
+            log_action(f"Would create {ssh_config} with {include_line}")
+        else:
+            text = ssh_config.read_text(encoding="utf-8")
+            if not any(include_re.match(line) for line in text.splitlines()):
+                log_action(f"Would prepend {include_line} to {ssh_config}")
+            else:
+                log_info(f"Include already present in {ssh_config}")
+        return
+
+    ssh_config.parent.mkdir(parents=True, exist_ok=True)
+    if not ssh_config.exists():
+        ssh_config.write_text(include_line + "\n", encoding="utf-8")
+        ssh_config.chmod(0o600)
+        log_success(f"Created {ssh_config} with Include")
+        return
+
+    text = ssh_config.read_text(encoding="utf-8")
+    if any(include_re.match(line) for line in text.splitlines()):
+        log_info(f"Include already present in {ssh_config}")
+        return
+
+    ssh_config.write_text(include_line + "\n\n" + text, encoding="utf-8")
+    ssh_config.chmod(0o600)
+    log_success(f"Prepended Include to {ssh_config}")
+
+
+def setup_ssh_configs(dotfiles: Path, home: Path, config: Config) -> None:
+    """Install shared SSH host fragments used by client machines.
+
+    Links ``dotfiles/ssh/config.d/*.conf`` into ``~/.ssh/config.d`` and
+    ensures the main SSH config includes those fragments. This is the
+    client handshake for connecting to the workstation with day-lived
+    certificates minted by ``workstation-auth``.
+
+    Parameters
+    ----------
+    dotfiles : Path
+        Root of the dotfiles repository.
+    home : Path
+        User home directory.
+    config : Config
+        Installer configuration.
+
+    Returns
+    -------
+    None
+        Side effect only: installs SSH config fragments and Include.
+    """
+    print("\n[ssh] Setting up shared SSH client handshake...")
+
+    src_dir = dotfiles / "ssh" / "config.d"
+    if not src_dir.is_dir():
+        log_warning(f"Missing SSH config fragments: {src_dir}")
+        return
+
+    ssh_dir = home / ".ssh"
+    config_d = ssh_dir / "config.d"
+    if not config.dry_run:
+        ssh_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
+        config_d.mkdir(mode=0o700, parents=True, exist_ok=True)
+        os.chmod(ssh_dir, 0o700)
+
+    for src in sorted(src_dir.glob("*.conf")):
+        create_symlink(src, config_d / src.name, config)
+
+    ensure_ssh_config_include(ssh_dir / "config", config)
 
 
 def setup_shell_configs(dotfiles: Path, home: Path, config: Config) -> None:
@@ -493,6 +616,10 @@ def print_post_install(missing: list[Tool]) -> None:
     print(f"    {step}. Open a new terminal or run: source ~/.zshrc")
     step += 1
     print(f"    {step}. Ensure a Nerd Font is installed for icons")
+    step += 1
+    print(f"    {step}. Client machines: run workstation-auth (password once / day), then ssh hduva")
+    step += 1
+    print(f"    {step}. Workstation host only: run workstation-ca-setup (sudo) once")
 
     print("\n  Recommended Nerd Fonts:")
     print("    - FiraCode Nerd Font")
@@ -550,6 +677,8 @@ def main() -> int:
     setup_shell_configs(dotfiles, home, config)
     setup_env_local_templates(dotfiles, config)
     setup_fish_configs(dotfiles, config_dir, config)
+    setup_bin_scripts(dotfiles, home, config)
+    setup_ssh_configs(dotfiles, home, config)
 
     if config.install_deps:
         install_dependencies(config)

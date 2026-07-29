@@ -3,6 +3,12 @@
 
 export MATURIN_PYPI_TOKEN=""
 export CLAUDE_CODE_OAUTH_TOKEN=""
+
+# Workstation SSH target (clients). On the workstation itself, also set:
+#   export WORKSTATION_ROLE=server
+# export WORKSTATION_SSH_HOST=hduva
+# export WORKSTATION_SSH_USER=hduva
+# export WORKSTATION_ROLE=client
 # export ANTHROPIC_AUTH_TOKEN=""
 # export ANTHROPIC_BASE_URL="https://api.example.com"
 # export ANTHROPIC_DEFAULT_HAIKU_MODEL=""

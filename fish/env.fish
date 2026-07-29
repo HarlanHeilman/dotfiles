@@ -1,5 +1,8 @@
 set -gx PROJECTS "$HOME/projects"
 
+set -gx WORKSTATION_SSH_HOST hduva
+set -gx WORKSTATION_SSH_USER hduva
+
 set -gx DISABLE_NON_ESSENTIAL_MODEL_CALLS 1
 set -gx DISABLE_TELEMETRY 1
 
@@ -20,14 +23,8 @@ if test "$_OS" = linux
         set -gx STOBE_BASIS "$STOBE"Basis/
     end
 
-    if test -d "$HOME/.jcmwave"
-        set -gx JCMROOT "$HOME/.jcmwave/"
-        set -gx JCMPYTHON "$JCMROOT"ThirdPartySupport/python/
-        if set -q PYTHONPATH
-            set -gx PYTHONPATH "$PYTHONPATH:$JCMPYTHON"
-        else
-            set -gx PYTHONPATH $JCMPYTHON
-        end
+    if test -d "$HOME/.jcm"
+        set -gx JCMROOT "$HOME/.jcm"
     end
 end
 

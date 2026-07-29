@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+CA_KEY="${WORKSTATION_CA_KEY:-$HOME/.ssh/ca/workstation_ca}"
+PRINCIPAL="${WORKSTATION_PRINCIPAL:-$(id -un)}"
+IDENTITY="${WORKSTATION_CERT_IDENTITY:-${PRINCIPAL}-workstation-$(date +%Y%m%d%H%M%S)}"
+VALIDITY="${WORKSTATION_CERT_VALIDITY:--5m:+1d}"
+
+if [[ ! -f "$CA_KEY" ]]; then
+    echo "workstation-sign: CA key not found at $CA_KEY" >&2
+    echo "Run workstation-ca-setup on the workstation first." >&2
+    exit 1
+fi
+
+tmp="$(mktemp -d)"
+trap 'rm -rf "$tmp"' EXIT
+
+if [[ $# -ge 1 ]]; then
+    cp "$1" "$tmp/user.pub"
+else
+    cat >"$tmp/user.pub"
+fi
+
+if [[ ! -s "$tmp/user.pub" ]]; then
+    echo "workstation-sign: empty public key" >&2
+    exit 1
+fi
+
+ssh-keygen -s "$CA_KEY" -I "$IDENTITY" -n "$PRINCIPAL" -V "$VALIDITY" "$tmp/user.pub" >/dev/null
+cat "$tmp/user-cert.pub"

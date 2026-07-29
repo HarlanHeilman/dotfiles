@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+CA_DIR="${WORKSTATION_CA_DIR:-$HOME/.ssh/ca}"
+CA_KEY="$CA_DIR/workstation_ca"
+CA_PUB="$CA_KEY.pub"
+SSHD_CA_PUB=/etc/ssh/workstation_ca.pub
+SSHD_CA_CONF=/etc/ssh/sshd_config.d/workstation-ca.conf
+PRINCIPAL="$(id -un)"
+
+mkdir -p "$HOME/.ssh" "$CA_DIR"
+chmod 700 "$HOME/.ssh" "$CA_DIR"
+
+if [[ ! -f "$CA_KEY" ]]; then
+    ssh-keygen -t ed25519 -f "$CA_KEY" -N '' -C "${PRINCIPAL}-workstation-ca"
+    chmod 600 "$CA_KEY"
+    chmod 644 "$CA_PUB"
+    echo "Created CA key $CA_KEY"
+else
+    echo "Using existing CA key $CA_KEY"
+fi
+
+sudo install -m 644 "$CA_PUB" "$SSHD_CA_PUB"
+printf 'TrustedUserCAKeys %s\n' "$SSHD_CA_PUB" | sudo tee "$SSHD_CA_CONF" >/dev/null
+
+if command -v sshd >/dev/null 2>&1; then
+    sudo sshd -t
+fi
+
+if systemctl is-active --quiet ssh; then
+    sudo systemctl reload ssh
+elif systemctl is-active --quiet sshd; then
+    sudo systemctl reload sshd
+else
+    echo "Installed $SSHD_CA_PUB and $SSHD_CA_CONF; reload sshd manually"
+    exit 0
+fi
+
+echo "sshd trusts $SSHD_CA_PUB"
+echo "Clients can run: workstation-auth"

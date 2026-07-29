@@ -91,3 +91,59 @@ smiles() {
 alias refresh='source ~/.zshrc && clear'
 alias edit='nvim ~/.zshrc && refresh'
 alias edot='nvim $DOTFILES/.zshrc && refresh'
+
+workstation-auth() {
+    local user_key="$HOME/.ssh/workstation"
+    local host="${WORKSTATION_SSH_HOST:-hduva}"
+    local remote_user="${WORKSTATION_SSH_USER:-hduva}"
+    local client_setup="${HOME}/.local/bin/workstation-client-setup"
+    local cert_out
+
+    if [[ -x "$client_setup" ]]; then
+        "$client_setup" || return $?
+    elif [[ -x "${DOTFILES:-$HOME/dotfiles}/bin/workstation-client-setup" ]]; then
+        "${DOTFILES:-$HOME/dotfiles}/bin/workstation-client-setup" || return $?
+    fi
+
+    mkdir -p "$HOME/.ssh"
+    chmod 700 "$HOME/.ssh"
+
+    if [[ ! -f "$user_key" ]]; then
+        ssh-keygen -t ed25519 -f "$user_key" -N '' -C "$(id -un)@client-for-workstation" || return $?
+        chmod 600 "$user_key"
+        chmod 644 "$user_key.pub"
+    fi
+
+    cert_out="$(mktemp)" || return $?
+
+    echo "Authenticating to ${remote_user}@${host} with account password to mint a 1-day cert"
+    if ssh \
+        -o PreferredAuthentications=password \
+        -o PubkeyAuthentication=no \
+        -o NumberOfPasswordPrompts=1 \
+        -o IdentitiesOnly=yes \
+        -l "$remote_user" \
+        "$host" \
+        '$HOME/.local/bin/workstation-sign' <"${user_key}.pub" >"$cert_out"
+    then
+        cp "$cert_out" "${user_key}-cert.pub"
+        chmod 600 "${user_key}-cert.pub"
+        rm -f "$cert_out"
+        echo "Successfully obtained ssh key $user_key"
+        ssh-keygen -L -f "${user_key}-cert.pub" | grep -i 'Valid:'
+        return 0
+    fi
+
+    rm -f "$cert_out"
+    echo "Failed to obtain workstation cert from $host" >&2
+    return 1
+}
+
+workstation-cert-status() {
+    local cert="$HOME/.ssh/workstation-cert.pub"
+    if [[ ! -f "$cert" ]]; then
+        echo "No workstation cert found at $cert. Run 'workstation-auth' first."
+        return 1
+    fi
+    ssh-keygen -L -f "$cert" | grep -i 'Valid:'
+}
