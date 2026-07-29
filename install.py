@@ -245,6 +245,78 @@ def setup_shell_configs(dotfiles: Path, home: Path, config: Config) -> None:
     create_symlink(dotfiles / ".zshrc", home / ".zshrc", config)
 
 
+def setup_env_local_templates(dotfiles: Path, config: Config) -> None:
+    """Seed gitignored local env overlays from committed example templates.
+
+    Copies each ``*.example.*`` env template into the corresponding
+    ``env.local.*`` path when that local file is missing. Existing local
+    files are left untouched so machine secrets are never overwritten.
+
+    Parameters
+    ----------
+    dotfiles : Path
+        Root of the dotfiles repository.
+    config : Config
+        Installer configuration; when ``dry_run`` is true, only logs the
+        intended copies.
+
+    Returns
+    -------
+    None
+        Side effect only: creates missing local env overlay files.
+    """
+    pairs = (
+        (
+            dotfiles / "zsh" / "env.local.example.zsh",
+            dotfiles / "zsh" / "env.local.zsh",
+        ),
+        (
+            dotfiles / "fish" / "env.local.example.fish",
+            dotfiles / "fish" / "env.local.fish",
+        ),
+    )
+    for example, local in pairs:
+        if not example.is_file():
+            log_warning(f"Missing env template: {example}")
+            continue
+        if local.exists():
+            log_info(f"Local env already present: {local}")
+            continue
+        if config.dry_run:
+            log_action(f"Would copy {example} -> {local}")
+            continue
+        try:
+            shutil.copy2(example, local)
+            log_success(f"Created local env from template: {local}")
+            log_warning(f"Fill in secret values in {local}")
+        except OSError as e:
+            log_error(f"Failed to create {local}: {e}")
+
+
+def setup_fish_configs(dotfiles: Path, config_dir: Path, config: Config) -> None:
+    fish_dir = config_dir / "fish"
+    fish_dir.mkdir(parents=True, exist_ok=True)
+    create_symlink(dotfiles / "fish" / "config.fish", fish_dir / "config.fish", config)
+
+    functions_dir = fish_dir / "functions"
+    functions_dir.mkdir(parents=True, exist_ok=True)
+    dotfiles_functions = dotfiles / "fish" / "functions"
+    if dotfiles_functions.is_dir():
+        for fish_func in sorted(dotfiles_functions.glob("*.fish")):
+            create_symlink(fish_func, functions_dir / fish_func.name, config)
+
+    completions_dir = fish_dir / "completions"
+    completions_dir.mkdir(parents=True, exist_ok=True)
+    dotfiles_completions = dotfiles / "fish" / "completions"
+    if dotfiles_completions.is_dir():
+        for fish_completion in sorted(dotfiles_completions.glob("*.fish")):
+            create_symlink(
+                fish_completion,
+                completions_dir / fish_completion.name,
+                config,
+            )
+
+
 def setup_tool_configs(dotfiles: Path, config_dir: Path, config: Config) -> None:
     print("\n[3/3] Setting up tool configurations...")
 
@@ -299,6 +371,7 @@ TOOLS: list[Tool] = [
     Tool("fd", "fd", False, "fd", "fd-find", "Fast find replacement"),
     Tool("lazygit", "lazygit", False, "lazygit", None, "Terminal UI for git"),
     Tool("neovim", "nvim", False, "neovim", "neovim", "Vim-based text editor"),
+    Tool("fish", "fish", False, "fish", "fish", "Friendly interactive shell"),
 ]
 
 
@@ -475,6 +548,8 @@ def main() -> int:
         print("\n  [DRY RUN MODE - No changes will be made]")
 
     setup_shell_configs(dotfiles, home, config)
+    setup_env_local_templates(dotfiles, config)
+    setup_fish_configs(dotfiles, config_dir, config)
 
     if config.install_deps:
         install_dependencies(config)

@@ -1,8 +1,6 @@
 [pip]
-all-extras = true
 compile-bytecode = true
 config-settings = { editable_mode = "compat" }
 index-strategy = "unsafe-best-match"
 link-mode = "symlink"
 prerelease = "allow"
-resolution = "lowest-direct"
