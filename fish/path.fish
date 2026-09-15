@@ -16,6 +16,7 @@ function __dotfiles_import_sh_env --description 'Import variables from a POSIX s
     end
 end
 
+fish_add_path $DOTFILES/bin
 fish_add_path $HOME/.local/bin
 fish_add_path $HOME/.cargo/bin
 
