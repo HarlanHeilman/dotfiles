@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SSH_KEY="${HOME}/.ssh/id_ed25519"
+SSH_HOST="jcm-license"
+SSH_USER="rsoxsadmin"
+SSH_HOSTNAME="jcmlicenseserver.lbl.gov"
+
+# Verify SSH key exists
+if [[ ! -f "$SSH_KEY" ]]; then
+    echo "jcm-auth: SSH key not found at $SSH_KEY" >&2
+    echo "jcm-auth: Generate with: ssh-keygen -t ed25519 -f $SSH_KEY" >&2
+    exit 1
+fi
+
+# Create SSH control directory for connection reuse
+mkdir -p "${HOME}/.ssh/control"
+
+# Set up SSH config if not already present
+if ! grep -q "Host jcm-license" "${HOME}/.ssh/config" 2>/dev/null; then
+    echo "jcm-auth: jcm-license not found in SSH config" >&2
+    exit 1
+fi
+
+# Establish persistent SSH connection for the day
+ssh -o ControlMaster=yes -o ControlPath="${HOME}/.ssh/control/%h_%p_%r" \
+    -o ControlPersist=8h -o ConnectTimeout=10 -nN "$SSH_HOST" &
+
+# Wait for connection to establish
+sleep 2
+
+# Verify connection was successful
+if ssh -o ControlPath="${HOME}/.ssh/control/%h_%p_%r" -q "$SSH_HOST" exit; then
+    echo "✓ jcm-auth: SSH session established for $SSH_USER@$SSH_HOSTNAME"
+    echo "✓ Connection persists for 8 hours"
+else
+    echo "✗ jcm-auth: SSH connection failed" >&2
+    echo "  Verify: ssh $SSH_HOST" >&2
+    exit 1
+fi
