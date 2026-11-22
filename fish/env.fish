@@ -10,7 +10,7 @@ end
 set -gx DISABLE_NON_ESSENTIAL_MODEL_CALLS 1
 set -gx DISABLE_TELEMETRY 1
 
-set -gx POLARS_VERBOSE 1
+set -gx POLARS_VERBOSE 0
 set -gx RUST_BACKTRACE full
 set -gx RUST_LOG warn
 set -gx CARGO_PROFILE_RELEASE_BUILD_OVERRIDE_DEBUG true
@@ -35,3 +35,4 @@ end
 if test -r "$DOTFILES/fish/env.local.fish"
     source "$DOTFILES/fish/env.local.fish"
 end
+set -gx BAT_THEME ansi

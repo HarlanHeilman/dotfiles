@@ -41,6 +41,11 @@ if type -q starship
     end
 end
 
+# zoxide: provides __zoxide_z/__zoxide_zi, used by functions/cd.fish (cd, cdi)
+if type -q zoxide
+    zoxide init fish --no-cmd | source
+end
+
 if test -f "$DOTFILES/fish/fzf.fish"
     source "$DOTFILES/fish/fzf.fish"
 end
@@ -55,6 +60,16 @@ if type -q fzf
             source /usr/share/fzf/key-bindings.fish
         end
     end
+end
+
+# atuin: Ctrl-R history search (after fzf so it wins; Up arrow stays plain history)
+if type -q atuin
+    atuin init fish --disable-up-arrow | source
+end
+
+# mise: per-project tool versions (e.g. node 24 from .node-version). Secrets stay in infisical.
+if type -q mise
+    mise activate fish | source
 end
 
 if test -r "$HOME/.config/fish/config.local.fish"
