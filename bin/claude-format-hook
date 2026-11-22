@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# PostToolUse hook: format the file Claude just wrote with the project's own formatter.
+# Never fails the tool call; silently does nothing if no formatter applies.
+file="$(jq -r '.tool_input.file_path // empty' 2>/dev/null)"
+[[ -n "$file" && -f "$file" ]] || exit 0
+dir="$(dirname "$file")"
+root="$(git -C "$dir" rev-parse --show-toplevel 2>/dev/null || echo "$dir")"
+case "$file" in
+  *.py)
+    command -v ruff >/dev/null && ruff format --quiet "$file" ;;
+  *.ts|*.tsx|*.js|*.jsx|*.mjs|*.json|*.css)
+    if [[ -x "$root/node_modules/.bin/oxfmt" && -f "$root/.oxfmtrc.json" ]]; then
+      (cd "$root" && node_modules/.bin/oxfmt "$file")
+    elif [[ -x "$root/node_modules/.bin/biome" ]]; then
+      (cd "$root" && node_modules/.bin/biome format --write "$file")
+    fi ;;
+  *.rs)
+    command -v rustfmt >/dev/null && rustfmt --edition 2021 "$file" ;;
+  *.fish)
+    command -v fish_indent >/dev/null && fish_indent -w "$file" ;;
+esac
+exit 0

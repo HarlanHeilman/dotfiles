@@ -1,0 +1,98 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git show *)",
+      "Bash(git branch *)",
+      "Bash(git add *)",
+      "Bash(git rm *)",
+      "Bash(git check-ignore *)",
+      "Bash(gh pr view *)",
+      "Bash(gh pr list *)",
+      "Bash(gh pr diff *)",
+      "Bash(gh issue view *)",
+      "Bash(gh issue list *)",
+      "Bash(ls *)",
+      "Bash(fd *)",
+      "Bash(rg *)",
+      "Bash(jq *)",
+      "Bash(just --list *)",
+      "Bash(ruff check *)",
+      "Bash(ruff format --check *)",
+      "Bash(ty check *)",
+      "Bash(uv run pytest *)",
+      "Bash(uv run ruff *)",
+      "Bash(uv run ty *)",
+      "Bash(bun test *)",
+      "Bash(bun run check)",
+      "Bash(bun run lint)",
+      "Bash(bun run typecheck)",
+      "Bash(oxlint *)",
+      "Bash(tsc --noEmit *)",
+      "Bash(cargo check *)",
+      "Bash(cargo clippy *)",
+      "Bash(cargo test *)",
+      "Bash(cargo nextest *)",
+      "Bash(cargo fmt --check *)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.local)",
+      "Read(./.env.*.local)",
+      "Read(./.env.production)",
+      "Read(./.env.development)",
+      "Read(~/.ssh/**)",
+      "Read(~/.config/gh/**)",
+      "Read(~/.infisical/**)",
+      "Read(~/dotfiles/fish/env.local.fish)",
+      "Read(~/.config/fish/config.local.fish)",
+      "Bash(infisical export *)",
+      "Bash(infisical secrets *)",
+      "Bash(git push --force *)",
+      "Bash(git push -f *)",
+      "Bash(rm -rf /*)",
+      "Bash(rm -rf ~*)"
+    ],
+    "additionalDirectories": [
+      "/tmp"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/dotfiles/bin/claude-format-hook"
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "supabase@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "ponytail": {
+      "source": {
+        "source": "github",
+        "repo": "DietrichGebert/ponytail"
+      }
+    }
+  },
+  "tui": "fullscreen",
+  "modelSettings": {
+    "claude-sonnet-5-5": {
+      "effortLevel": "low"
+    }
+  }
+}
