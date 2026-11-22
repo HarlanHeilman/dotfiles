@@ -1,0 +1,276 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run `zed: open default settings` from the
+// command palette (cmd-shift-p / ctrl-shift-p)
+{
+  "code_lens": "on",
+  "restore_on_startup": "launchpad",
+  "inlay_hints": {
+    "show_background": true,
+    "enabled": true
+  },
+  "relative_line_numbers": "enabled",
+  "collaboration_panel": {
+    "dock": "left",
+    "button": true
+  },
+  "agent": {
+    "threads_sidebar": {
+      "position": "right"
+    },
+    "dock": "right",
+    "sandbox_permissions": {
+      "allow_unsandboxed": true
+    },
+    "notify_when_agent_waiting": "all_screens",
+    "default_model": {
+      "provider": "zed.dev",
+      "model": "claude-opus-5-5",
+      "enable_thinking": true,
+      "effort": "medium"
+    },
+    "favorite_models": [],
+    "model_parameters": [],
+    // Auto-approve all agent tool calls, except the few risky ones below.
+    "tool_permissions": {
+      "default": "allow",
+      "tools": {
+        "terminal": {
+          "always_confirm": [
+            { "pattern": "\\bsudo\\b" },
+            { "pattern": "git\\s+push\\b.*(--force|-f\\b)" },
+            { "pattern": "git\\s+reset\\s+--hard" }
+          ]
+        }
+      }
+    }
+  },
+  "git_panel": {
+    "dock": "left",
+    "tree_view": true
+  },
+  "proxy": "",
+  "ssh_connections": [
+    {
+      "host": "hduva-workstation",
+      "args": [],
+      "projects": [
+        {
+          "paths": [
+            "/home/hduva"
+          ]
+        },
+        {
+          "paths": [
+            "/home/hduva/projects"
+          ]
+        },
+        {
+          "paths": [
+            "/home/hduva/projects/xrr_notebooks"
+          ]
+        },
+        {
+          "paths": [
+            "/home/rsoxsadmin"
+          ]
+        }
+      ]
+    },
+    {
+      "host": "perlmutter.nersc.gov",
+      "username": "hdh",
+      "args": [],
+      "projects": [
+        {
+          "paths": [
+            "/global/homes/h/hdh"
+          ]
+        },
+        {
+          "paths": [
+            "/global/homes/h/hdh/JCMwave_modeling"
+          ]
+        }
+      ]
+    },
+    {
+      "host": "jcmlicenseserver.lbl.gov",
+      "username": "rsoxsadmin",
+      "args": [],
+      "projects": [
+        {
+          "paths": [
+            "/home/rsoxsadmin"
+          ]
+        },
+        {
+          "paths": [
+            "/home/rsoxsadmin/jcmserver/./"
+          ]
+        }
+      ]
+    },
+    {
+      "host": "jcm-license",
+      "args": [],
+      "projects": []
+    },
+    {
+      "host": "hduva-pc",
+      "args": [],
+      "projects": []
+    },
+    {
+      "host": "131.243.88.167",
+      "username": "jcmwave",
+      "args": [],
+      "projects": [
+        {
+          "paths": [
+            "/home/jcmwave"
+          ]
+        }
+      ]
+    },
+    {
+      "host": "hduva",
+      "args": [],
+      "projects": [
+        {
+          "paths": [
+            "/home/hduva/projects"
+          ]
+        }
+      ]
+    },
+    {
+      "host": "perlmutter",
+      "args": [],
+      "projects": []
+    }
+  ],
+  "terminal": {
+    "shell": {
+      "program": "fish"
+    },
+    "font_size": 17.0,
+    "font_family": "RobotoMono Nerd Font Mono",
+    "font_fallbacks": ["monospace"],
+    "line_height": {
+      "custom": 1.2,
+    },
+    "cursor_shape": "block",
+    "blinking": "on",
+  },
+  "project_panel": {
+    "dock": "left",
+    "git_status": false,
+  },
+  "outline_panel": {
+    "dock": "left",
+    "git_status": false,
+  },
+  "tabs": {
+    "git_status": false,
+  },
+  "sticky_scroll": {
+    "enabled": false,
+  },
+  "minimap": {
+    "thumb": "hover",
+  },
+  "cursor_shape": "block",
+  "cursor_blink": false,
+  "autosave": {
+    "after_delay": {
+      "milliseconds": 1000,
+    },
+  },
+  "buffer_font_fallbacks": ["monospace"],
+  "buffer_font_family": "FiraCode Nerd Font",
+  "file_types": {
+    "tailwindcss": ["*.css"],
+  },
+  "colorize_brackets": false,
+  "show_whitespaces": "trailing",
+  "ensure_final_newline_on_save": true,
+  "wrap_guides": [88, 120],
+  "preferred_line_length": 88,
+  "soft_wrap": "none",
+  "languages": {
+      "Markdown": {
+        "soft_wrap": "prefer_line",
+        "preferred_line_length": 80
+      },
+      "Python": {
+        "format_on_save": "modifications",
+        "indent_guides": {
+          "line_width": 1,
+          "active_line_width": 2,
+          "background_coloring": "disabled",
+          "coloring": "fixed"
+        },
+        "soft_wrap": "none",
+        "hard_tabs": true,
+        "language_servers": ["pyright"]
+      }
+    },
+  // External agents own their permission prompts. Auto-approve values differ per agent:
+  //   claude-acp -> "mode": "bypassPermissions"
+  //   codex-acp  -> "mode": "agent-full-access"
+  //   gemini     -> "mode": "yolo"
+  //   cursor     -> no mode; pass --force to cursor-agent (see below)
+  // Add one under `default_config_options` when installing that agent.
+  "agent_servers": {
+    "antigravity-acp": {
+      "default_config_options": {
+        "mode": "yolo",
+        "model": "gemini-4-carbon"
+      },
+      "type": "registry"
+    },
+    "opencode-v2": {
+      "default_config_options": {
+        "model": "opencode/big-pickle"
+      },
+      "type": "registry"
+    },
+    "claude-acp": {
+      "default_config_options": {
+        "effort": "medium",
+        "model": "sonnet",
+        "mode": "bypassPermissions"
+      },
+      "type": "registry",
+    },
+  },
+  "edit_predictions": {
+    "provider": "zed",
+  },
+  "icon_theme": {
+    "mode": "light",
+    "light": "VSCode Great Icons Theme",
+    "dark": "Light Charmed Icons"
+  },
+  "base_keymap": "VSCode",
+  "ui_font_size": 16,
+  "buffer_font_size": 17.0,
+  "theme": {
+    "mode": "system",
+    "light": "One Light",
+    "dark": "Cursor Dark",
+  },
+  "feature_flags":{
+    "notebooks": "on"
+  },
+  "scrollbar":{
+    "show":"always"
+  },
+  "lsp": {
+  }
+}
