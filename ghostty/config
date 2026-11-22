@@ -1,0 +1,28 @@
+# macOS-native look: system colors (follow light/dark), Liquid Glass blur, native tabs, SF Mono.
+theme = light:Apple System Colors Light,dark:Apple System Colors
+
+# Liquid Glass
+background-opacity = 0.85
+background-blur = macos-glass-regular
+macos-titlebar-style = tabs
+macos-icon = glass
+window-theme = auto
+window-colorspace = display-p3
+window-padding-x = 10
+window-padding-y = 8
+window-padding-balance = true
+window-save-state = always
+
+# SF Mono for text, Nerd Font only as a fallback for prompt/icon glyphs
+font-family = SF Mono
+font-family = FiraCode Nerd Font
+font-size = 14
+
+command = /opt/homebrew/bin/fish
+macos-option-as-alt = true
+mouse-hide-while-typing = true
+copy-on-select = clipboard
+
+# Drop-down terminal on Ctrl+` (needs Accessibility permission the first time)
+quick-terminal-position = top
+keybind = global:ctrl+grave_accent=toggle_quick_terminal
