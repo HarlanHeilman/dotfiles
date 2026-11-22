@@ -5,11 +5,12 @@ DOTFILES="${DOTFILES:-$HOME/dotfiles}"
 SRC_DIR="$DOTFILES/ssh/config.d"
 SSH_DIR="$HOME/.ssh"
 CONFIG_D="$SSH_DIR/config.d"
+CONTROL_DIR="$SSH_DIR/control"
 CONFIG="$SSH_DIR/config"
 INCLUDE_LINE='Include config.d/*.conf'
 
-mkdir -p "$SSH_DIR" "$CONFIG_D"
-chmod 700 "$SSH_DIR"
+mkdir -p "$SSH_DIR" "$CONFIG_D" "$CONTROL_DIR"
+chmod 700 "$SSH_DIR" "$CONTROL_DIR"
 
 if [[ ! -d "$SRC_DIR" ]]; then
     echo "workstation-client-setup: missing $SRC_DIR" >&2
@@ -17,9 +18,13 @@ if [[ ! -d "$SRC_DIR" ]]; then
     exit 1
 fi
 
+os_name="$(uname -s)"
 shopt -s nullglob
 for src in "$SRC_DIR"/*.conf; do
     base="$(basename "$src")"
+    if [[ "$base" == "01-macos-keychain.conf" && "$os_name" != "Darwin" ]]; then
+        continue
+    fi
     dest="$CONFIG_D/$base"
     if [[ -L "$dest" || -e "$dest" ]]; then
         if [[ -L "$dest" && "$(readlink "$dest")" == "$src" ]]; then
@@ -32,6 +37,11 @@ for src in "$SRC_DIR"/*.conf; do
     ln -s "$src" "$dest"
     echo "Linked $dest -> $src"
 done
+
+if [[ "$os_name" != "Darwin" && -e "$CONFIG_D/01-macos-keychain.conf" ]]; then
+    rm -f "$CONFIG_D/01-macos-keychain.conf"
+    echo "Removed non-macOS fragment $CONFIG_D/01-macos-keychain.conf"
+fi
 
 if [[ ! -f "$CONFIG" ]]; then
     printf '%s\n' "$INCLUDE_LINE" >"$CONFIG"
@@ -59,6 +69,6 @@ for script in workstation-sign workstation-ca-setup workstation-client-setup; do
     fi
 done
 
-echo "Client SSH handshake ready."
-echo "Mint a 1-day cert with: workstation-auth"
-echo "Then connect with: ssh hduva"
+echo "SSH host policy ready (IdentitiesOnly, agent/Keychain, ControlPersist)."
+echo "Authenticate with: auth hduva | auth perlmutter | auth user@host"
+echo "Then connect with: ssh <alias>"

@@ -1,0 +1,482 @@
+#!/usr/bin/env bash
+# Unified SSH host authentication.
+#
+#   auth                 show status for known identities
+#   auth <alias>         refresh auth for a configured Host
+#   auth user@hostname   bootstrap a new Host into ~/.ssh/config.d/local.conf
+#   auth status [target] same as status, optionally one target
+#
+# CA-fleet hosts (hduva, hduva-pc, ...) share ~/.ssh/workstation + a long-lived
+# CA cert. perlmutter uses NERSC sshproxy. Other hosts use Keychain-backed keys.
+set -euo pipefail
+
+SSH_DIR="${HOME}/.ssh"
+KEYS_DIR="${SSH_DIR}/keys"
+CONTROL_DIR="${SSH_DIR}/control"
+LOCAL_CONF="${SSH_DIR}/config.d/local.conf"
+CA_CLIENT_KEY="${AUTH_CA_CLIENT_KEY:-${SSH_DIR}/workstation}"
+CA_HOST="${AUTH_CA_HOST:-${WORKSTATION_SSH_HOST:-hduva}}"
+CA_USER="${AUTH_CA_USER:-${WORKSTATION_SSH_USER:-hduva}}"
+CERT_VALIDITY="${AUTH_CERT_VALIDITY:--5m:+90d}"
+NERSC_USER="${AUTH_NERSC_USER:-hdh}"
+FORCE=0
+
+CA_HOSTS_DEFAULT="hduva hduva-pc hduva-workstation"
+CA_HOSTS="${AUTH_CA_HOSTS:-$CA_HOSTS_DEFAULT}"
+
+usage() {
+    cat <<'EOF'
+Usage:
+  auth                      Status for CA client, NERSC, and agent
+  auth status [target]      Status (optional single target)
+  auth <alias>              Refresh auth for a configured Host alias
+  auth user@hostname        Bootstrap a new Host (key + config + ssh-copy-id)
+  auth -f|--force <target>  Force cert remint / re-bootstrap steps
+
+Examples:
+  auth hduva
+  auth perlmutter
+  auth hduva@131.243.88.167
+  auth rsoxsadmin@jcmlicenseserver.lbl.gov
+
+Environment:
+  AUTH_CA_HOST          Host alias that runs workstation-sign (default: hduva)
+  AUTH_CA_USER          User on the CA host (default: hduva)
+  AUTH_CA_CLIENT_KEY    Client key path (default: ~/.ssh/workstation)
+  AUTH_CERT_VALIDITY    ssh-keygen -V window (default: -5m:+90d)
+  AUTH_CA_HOSTS         Space-separated CA-fleet aliases
+  AUTH_NERSC_USER       NERSC username for sshproxy (default: hdh)
+EOF
+}
+
+log() { printf '%s\n' "$*"; }
+err() { printf 'auth: %s\n' "$*" >&2; }
+
+ensure_ssh_dirs() {
+    mkdir -p "$SSH_DIR" "$KEYS_DIR" "$CONTROL_DIR" "${SSH_DIR}/config.d"
+    chmod 700 "$SSH_DIR" "$KEYS_DIR" "$CONTROL_DIR"
+}
+
+is_ca_host() {
+    local target="$1" h
+    for h in $CA_HOSTS; do
+        [[ "$target" == "$h" ]] && return 0
+    done
+    return 1
+}
+
+host_configured() {
+    local target="$1"
+    ssh -G "$target" >/dev/null 2>&1
+}
+
+identity_for() {
+    local target="$1"
+    ssh -G "$target" 2>/dev/null | awk 'tolower($1)=="identityfile" {print $2; exit}'
+}
+
+expand_path() {
+    local p="$1"
+    p="${p/#\~/$HOME}"
+    printf '%s\n' "$p"
+}
+
+cert_path_for_key() {
+    printf '%s-cert.pub\n' "$1"
+}
+
+cert_valid_line() {
+    local cert="$1"
+    [[ -f "$cert" ]] || return 1
+    ssh-keygen -L -f "$cert" 2>/dev/null | awk 'tolower($0) ~ /valid:/ {print; exit}'
+}
+
+cert_is_fresh() {
+    local cert="$1"
+    local line end_epoch now skew
+    [[ -f "$cert" ]] || return 1
+    line="$(cert_valid_line "$cert" || true)"
+    [[ -n "$line" ]] || return 1
+    # Valid: from ... to YYYY-MM-DDTHH:MM:SS
+    end_epoch="$(
+        python3 - "$line" <<'PY'
+import re, sys, datetime as dt
+line = sys.argv[1]
+m = re.search(r"to\s+(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})", line)
+if not m:
+    raise SystemExit(1)
+end = dt.datetime.strptime(m.group(1), "%Y-%m-%dT%H:%M:%S")
+print(int(end.timestamp()))
+PY
+    )" || return 1
+    now="$(date +%s)"
+    skew=$((7 * 24 * 3600))
+    (( end_epoch - now > skew ))
+}
+
+load_key() {
+    local key="$1"
+    [[ -f "$key" ]] || return 0
+    if [[ "$(uname -s)" == "Darwin" ]]; then
+        ssh-add --apple-use-keychain "$key" 2>/dev/null || ssh-add "$key" 2>/dev/null || true
+    else
+        ssh-add "$key" 2>/dev/null || true
+    fi
+}
+
+ensure_ca_client_key() {
+    ensure_ssh_dirs
+    if [[ ! -f "$CA_CLIENT_KEY" ]]; then
+        log "Generating CA client key $CA_CLIENT_KEY (choose a passphrase; Keychain stores it on macOS)"
+        ssh-keygen -t ed25519 -f "$CA_CLIENT_KEY" -C "$(id -un)@ca-client"
+        chmod 600 "$CA_CLIENT_KEY"
+        chmod 644 "${CA_CLIENT_KEY}.pub"
+    fi
+}
+
+ca_host_reachable_with_pubkey() {
+    ssh \
+        -o BatchMode=yes \
+        -o ConnectTimeout=8 \
+        -o PreferredAuthentications=publickey \
+        -o IdentitiesOnly=yes \
+        -o ControlMaster=no \
+        -o ControlPath=none \
+        -i "$CA_CLIENT_KEY" \
+        -l "$CA_USER" \
+        "$CA_HOST" \
+        true >/dev/null 2>&1
+}
+
+mint_ca_cert() {
+    local cert_out remote_sign
+    ensure_ca_client_key
+    cert_out="$(mktemp)"
+    remote_sign='$HOME/.local/bin/workstation-sign'
+
+    if ca_host_reachable_with_pubkey; then
+        log "Renewing CA cert via existing access to ${CA_USER}@${CA_HOST} (validity ${CERT_VALIDITY})"
+        if ! AUTH_CERT_VALIDITY="$CERT_VALIDITY" ssh \
+            -o BatchMode=yes \
+            -o PreferredAuthentications=publickey \
+            -o IdentitiesOnly=yes \
+            -o ControlMaster=no \
+            -o ControlPath=none \
+            -i "$CA_CLIENT_KEY" \
+            -l "$CA_USER" \
+            "$CA_HOST" \
+            "AUTH_CERT_VALIDITY='${CERT_VALIDITY}' WORKSTATION_CERT_VALIDITY='${CERT_VALIDITY}' ${remote_sign}" \
+            <"${CA_CLIENT_KEY}.pub" >"$cert_out"
+        then
+            rm -f "$cert_out"
+            err "pubkey renew failed on $CA_HOST"
+            return 1
+        fi
+    else
+        log "Minting CA cert via account password on ${CA_USER}@${CA_HOST} (validity ${CERT_VALIDITY})"
+        if ! ssh \
+            -o PreferredAuthentications=password \
+            -o PubkeyAuthentication=no \
+            -o NumberOfPasswordPrompts=1 \
+            -o IdentitiesOnly=yes \
+            -o ControlMaster=no \
+            -o ControlPath=none \
+            -l "$CA_USER" \
+            "$CA_HOST" \
+            "AUTH_CERT_VALIDITY='${CERT_VALIDITY}' WORKSTATION_CERT_VALIDITY='${CERT_VALIDITY}' ${remote_sign}" \
+            <"${CA_CLIENT_KEY}.pub" >"$cert_out"
+        then
+            rm -f "$cert_out"
+            err "password mint failed on $CA_HOST"
+            return 1
+        fi
+    fi
+
+    cp "$cert_out" "$(cert_path_for_key "$CA_CLIENT_KEY")"
+    chmod 600 "$(cert_path_for_key "$CA_CLIENT_KEY")"
+    rm -f "$cert_out"
+    load_key "$CA_CLIENT_KEY"
+    log "CA cert ready:"
+    cert_valid_line "$(cert_path_for_key "$CA_CLIENT_KEY")" || true
+}
+
+auth_ca_fleet() {
+    local target="$1"
+    local cert
+    cert="$(cert_path_for_key "$CA_CLIENT_KEY")"
+    if [[ $FORCE -eq 0 ]] && cert_is_fresh "$cert"; then
+        log "$target: CA cert still fresh"
+        cert_valid_line "$cert" || true
+        load_key "$CA_CLIENT_KEY"
+        return 0
+    fi
+    mint_ca_cert
+}
+
+auth_perlmutter() {
+    if ! command -v sshproxy >/dev/null 2>&1; then
+        err "sshproxy not on PATH. Install from https://portal.nersc.gov/cfs/mfa/ into ~/.local/bin"
+        return 1
+    fi
+    log "Refreshing NERSC cert via sshproxy (password + OTP)"
+    sshproxy -u "$NERSC_USER"
+    load_key "${SSH_DIR}/nersc"
+    if [[ -f "${SSH_DIR}/nersc-cert.pub" ]]; then
+        cert_valid_line "${SSH_DIR}/nersc-cert.pub" || true
+    fi
+}
+
+auth_key_host() {
+    local target="$1"
+    local id cert
+    id="$(identity_for "$target")"
+    if [[ -z "$id" ]]; then
+        err "no IdentityFile for $target"
+        return 1
+    fi
+    id="$(expand_path "$id")"
+    if [[ ! -f "$id" ]]; then
+        err "missing identity $id for $target"
+        return 1
+    fi
+    load_key "$id"
+    cert="$(cert_path_for_key "$id")"
+    if [[ -f "$cert" ]]; then
+        cert_valid_line "$cert" || true
+    fi
+    if ssh -o BatchMode=yes -o ConnectTimeout=8 "$target" true >/dev/null 2>&1; then
+        log "$target: ok (pubkey/cert + Keychain/agent)"
+        return 0
+    fi
+    err "$target: could not authenticate in BatchMode"
+    err "fix once interactively: ssh $target"
+    err "or bootstrap: auth user@hostname"
+    return 1
+}
+
+sanitize_alias() {
+    local host="$1"
+    local alias
+    alias="${host%%.*}"
+    alias="$(printf '%s' "$alias" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9_-' '_')"
+    alias="${alias##_}"
+    alias="${alias%%_}"
+    [[ -n "$alias" ]] || alias="host"
+    printf '%s\n' "$alias"
+}
+
+local_conf_has_host() {
+    local alias="$1"
+    [[ -f "$LOCAL_CONF" ]] || return 1
+    grep -qE "^[[:space:]]*Host[[:space:]]+${alias}([[:space:]]|$)" "$LOCAL_CONF"
+}
+
+append_local_host() {
+    local alias="$1" user="$2" hostname="$3" key="$4"
+    ensure_ssh_dirs
+    if [[ ! -f "$LOCAL_CONF" ]]; then
+        cat >"$LOCAL_CONF" <<'EOF'
+# Managed by `auth user@host`. Not part of the dotfiles repo.
+EOF
+        chmod 600 "$LOCAL_CONF"
+    fi
+    if local_conf_has_host "$alias"; then
+        log "Host $alias already present in $LOCAL_CONF"
+        return 0
+    fi
+    cat >>"$LOCAL_CONF" <<EOF
+
+Host ${alias}
+  HostName ${hostname}
+  User ${user}
+  IdentityFile ${key}
+  IdentitiesOnly yes
+EOF
+    log "Added Host ${alias} -> ${user}@${hostname} (${key})"
+}
+
+bootstrap_user_host() {
+    local spec="$1"
+    local user hostname alias key
+
+    if [[ "$spec" != *@* ]]; then
+        err "expected user@hostname, got: $spec"
+        return 1
+    fi
+    user="${spec%%@*}"
+    hostname="${spec#*@}"
+    if [[ -z "$user" || -z "$hostname" ]]; then
+        err "invalid user@hostname: $spec"
+        return 1
+    fi
+
+    alias="$(sanitize_alias "$hostname")"
+    key="${KEYS_DIR}/${alias}"
+
+    ensure_ssh_dirs
+
+    if [[ ! -f "$key" ]]; then
+        log "Generating ${key} (choose a passphrase; Keychain stores it on macOS)"
+        ssh-keygen -t ed25519 -f "$key" -C "$(id -un)@${alias}"
+        chmod 600 "$key"
+        chmod 644 "${key}.pub"
+    fi
+
+    append_local_host "$alias" "$user" "$hostname" "$key"
+    load_key "$key"
+
+    log "Installing pubkey on ${user}@${hostname} (password once if needed)"
+    if command -v ssh-copy-id >/dev/null 2>&1; then
+        ssh-copy-id \
+            -i "${key}.pub" \
+            -o IdentitiesOnly=yes \
+            -o ControlMaster=no \
+            -o ControlPath=none \
+            "${user}@${hostname}"
+    else
+        err "ssh-copy-id not found; install pubkey manually: ${key}.pub"
+        return 1
+    fi
+
+    if ssh -o BatchMode=yes -o ConnectTimeout=10 "$alias" true >/dev/null 2>&1; then
+        log "Bootstrap complete. Connect with: ssh ${alias}"
+        return 0
+    fi
+    err "pubkey installed but BatchMode login as Host ${alias} failed"
+    err "try: ssh ${alias}"
+    return 1
+}
+
+print_status_one() {
+    local label="$1" key="$2"
+    local cert line
+    printf '  %-16s ' "$label"
+    if [[ ! -f "$key" ]]; then
+        printf 'missing key (%s)\n' "$key"
+        return
+    fi
+    cert="$(cert_path_for_key "$key")"
+    if [[ -f "$cert" ]]; then
+        line="$(cert_valid_line "$cert" || true)"
+        if [[ -n "$line" ]]; then
+            printf '%s\n' "$line"
+        else
+            printf 'key+cert present\n'
+        fi
+    else
+        printf 'key present (no cert)\n'
+    fi
+}
+
+cmd_status() {
+    local target="${1:-}"
+    ensure_ssh_dirs
+    if [[ -n "$target" ]]; then
+        if is_ca_host "$target"; then
+            print_status_one "$target" "$CA_CLIENT_KEY"
+        elif [[ "$target" == "perlmutter" ]]; then
+            print_status_one "perlmutter" "${SSH_DIR}/nersc"
+        else
+            local id
+            id="$(identity_for "$target")"
+            if [[ -z "$id" ]]; then
+                err "unknown target: $target"
+                return 1
+            fi
+            print_status_one "$target" "$(expand_path "$id")"
+        fi
+        return 0
+    fi
+
+    log "SSH auth status"
+    print_status_one "ca-client" "$CA_CLIENT_KEY"
+    print_status_one "perlmutter" "${SSH_DIR}/nersc"
+    if [[ -f "${SSH_DIR}/id_ed25519" ]]; then
+        print_status_one "id_ed25519" "${SSH_DIR}/id_ed25519"
+    fi
+    if [[ -d "$KEYS_DIR" ]]; then
+        local k
+        for k in "$KEYS_DIR"/*; do
+            [[ -f "$k" && "$k" != *.pub && "$k" != *-cert.pub ]] || continue
+            print_status_one "key:$(basename "$k")" "$k"
+        done
+    fi
+    if command -v ssh-add >/dev/null 2>&1; then
+        log "Agent:"
+        ssh-add -l 2>/dev/null | sed 's/^/  /' || log "  (empty or locked)"
+    fi
+}
+
+auth_target() {
+    local target="$1"
+
+    if [[ "$target" == *@* ]]; then
+        bootstrap_user_host "$target"
+        return $?
+    fi
+
+    if [[ "$target" == "perlmutter" ]]; then
+        auth_perlmutter
+        return $?
+    fi
+
+    if is_ca_host "$target"; then
+        auth_ca_fleet "$target"
+        return $?
+    fi
+
+    if host_configured "$target"; then
+        # If this alias already points at the CA client key, treat as fleet.
+        local id
+        id="$(expand_path "$(identity_for "$target")")"
+        if [[ "$id" == "$CA_CLIENT_KEY" ]]; then
+            auth_ca_fleet "$target"
+            return $?
+        fi
+        auth_key_host "$target"
+        return $?
+    fi
+
+    err "unknown host alias '$target'"
+    err "configure it first, or bootstrap with: auth user@hostname"
+    return 1
+}
+
+main() {
+    local args=()
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -f|--force)
+                FORCE=1
+                shift
+                ;;
+            -h|--help)
+                usage
+                return 0
+                ;;
+            --)
+                shift
+                args+=("$@")
+                break
+                ;;
+            *)
+                args+=("$1")
+                shift
+                ;;
+        esac
+    done
+
+    if [[ ${#args[@]} -eq 0 ]]; then
+        cmd_status
+        return 0
+    fi
+
+    if [[ "${args[0]}" == "status" ]]; then
+        cmd_status "${args[1]:-}"
+        return $?
+    fi
+
+    auth_target "${args[0]}"
+}
+
+main "$@"

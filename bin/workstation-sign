@@ -3,8 +3,8 @@ set -euo pipefail
 
 CA_KEY="${WORKSTATION_CA_KEY:-$HOME/.ssh/ca/workstation_ca}"
 PRINCIPAL="${WORKSTATION_PRINCIPAL:-$(id -un)}"
-IDENTITY="${WORKSTATION_CERT_IDENTITY:-${PRINCIPAL}-workstation-$(date +%Y%m%d%H%M%S)}"
-VALIDITY="${WORKSTATION_CERT_VALIDITY:--5m:+1d}"
+IDENTITY="${WORKSTATION_CERT_IDENTITY:-${PRINCIPAL}-ca-$(date +%Y%m%d%H%M%S)}"
+VALIDITY="${WORKSTATION_CERT_VALIDITY:-${AUTH_CERT_VALIDITY:--5m:+90d}}"
 
 if [[ ! -f "$CA_KEY" ]]; then
     echo "workstation-sign: CA key not found at $CA_KEY" >&2

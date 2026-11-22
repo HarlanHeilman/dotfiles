@@ -37,4 +37,4 @@ else
 fi
 
 echo "sshd trusts $SSHD_CA_PUB"
-echo "Clients can run: workstation-auth"
+echo "Clients can run: auth hduva   (90-day cert by default)"
