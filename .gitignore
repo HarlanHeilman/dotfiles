@@ -13,3 +13,5 @@ fish/env.local.fish
 **/.env.*
 !**/.env.example
 !**/*.example.*
+.DS_Store
+.claude/settings.local.json
