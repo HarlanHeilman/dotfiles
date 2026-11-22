@@ -12,7 +12,8 @@
 - **Task running:** prefer a repo's `justfile` or package scripts over ad-hoc commands.
 
 ## Secrets
-- Secrets live in Infisical. Run commands that need them via `infisical run --env=<env> -- <cmd>`.
+- Project secrets (xray-atlas only) live in Infisical: run commands that need them via `infisical run --env=<env> -- <cmd>`.
+- Personal secrets and tokens live only in the gitignored `~/dotfiles/fish/env.local.fish` on this Mac, which is the source of truth. Do not move them to Infisical.
 - Never read, print, or commit `.env*` files, tokens, or `~/dotfiles/fish/env.local.fish`. Do not run `infisical export` or `infisical secrets`.
 
 ## Git
