@@ -1,0 +1,5 @@
+# User-level fallback; any project pyproject.toml / ruff.toml takes precedence.
+line-length = 100
+
+[lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]

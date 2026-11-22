@@ -1,0 +1,26 @@
+# Included from ~/.gitconfig by install.py. Identity and signing stay in ~/.gitconfig.
+[init]
+    defaultBranch = main
+[pull]
+    rebase = true
+[push]
+    autoSetupRemote = true
+    followTags = true
+[fetch]
+    prune = true
+[rebase]
+    autoStash = true
+    autosquash = true
+[rerere]
+    enabled = true
+[diff]
+    algorithm = histogram
+[branch]
+    sort = -committerdate
+[column]
+    ui = auto
+[alias]
+    st = status -sb
+    lg = log --oneline --graph --decorate -n 30
+    last = log -1 --stat
+    undo = reset --soft HEAD~1

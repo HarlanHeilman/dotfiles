@@ -1,0 +1,8 @@
+# vi-mode friendly: keep Up arrow as normal history, Ctrl-R opens atuin
+search_mode = "fuzzy"
+filter_mode = "global"
+style = "compact"
+inline_height = 20
+enter_accept = false
+# Never record commands that carry secrets
+history_filter = ["^infisical", "TOKEN", "SECRET", "PASSWORD", "API_KEY"]

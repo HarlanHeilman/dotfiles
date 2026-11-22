@@ -12,7 +12,7 @@ Usage:
 Options:
     --dry-run       Show what would be done without making changes
     --no-backup     Skip backing up existing files
-    --install-deps  Install dependencies (starship, fzf, bat, eza, ripgrep)
+    --install-deps  Install dependencies (starship, zoxide, fzf, bat, eza, ripgrep)
 """
 from __future__ import annotations
 
@@ -220,7 +220,7 @@ def install_dependencies(config: Config) -> None:
     print("\n[2/3] Installing dependencies...")
 
     detected_os = detect_os()
-    packages = ["starship", "fzf", "bat", "eza", "ripgrep", "fd"]
+    packages = ["starship", "zoxide", "fzf", "bat", "eza", "ripgrep", "fd"]
 
     if detected_os == OS.MACOS:
         install_homebrew_packages(packages, config)
@@ -320,12 +320,13 @@ def ensure_ssh_config_include(ssh_config: Path, config: Config) -> None:
 
 
 def setup_ssh_configs(dotfiles: Path, home: Path, config: Config) -> None:
-    """Install shared SSH host fragments used by client machines.
+    """Install host-scoped SSH client policy and control-socket directory.
 
-    Links ``dotfiles/ssh/config.d/*.conf`` into ``~/.ssh/config.d`` and
-    ensures the main SSH config includes those fragments. This is the
-    client handshake for connecting to the workstation with day-lived
-    certificates minted by ``workstation-auth``.
+    Links ``dotfiles/ssh/config.d/*.conf`` into ``~/.ssh/config.d``, ensures
+    ``~/.ssh/config`` includes those fragments, and creates
+    ``~/.ssh/control`` for ``ControlMaster`` multiplexing. Host fragments
+    select per-target identities; defaults enable IdentitiesOnly, agent
+    loading, macOS Keychain passphrase reuse, and an 8h control persist.
 
     Parameters
     ----------
@@ -339,9 +340,10 @@ def setup_ssh_configs(dotfiles: Path, home: Path, config: Config) -> None:
     Returns
     -------
     None
-        Side effect only: installs SSH config fragments and Include.
+        Side effect only: installs SSH config fragments, Include, and
+        control directory.
     """
-    print("\n[ssh] Setting up shared SSH client handshake...")
+    print("\n[ssh] Setting up host-scoped SSH client policy...")
 
     src_dir = dotfiles / "ssh" / "config.d"
     if not src_dir.is_dir():
@@ -350,22 +352,101 @@ def setup_ssh_configs(dotfiles: Path, home: Path, config: Config) -> None:
 
     ssh_dir = home / ".ssh"
     config_d = ssh_dir / "config.d"
+    control_dir = ssh_dir / "control"
     if not config.dry_run:
         ssh_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
         config_d.mkdir(mode=0o700, parents=True, exist_ok=True)
+        control_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
         os.chmod(ssh_dir, 0o700)
+        os.chmod(control_dir, 0o700)
+    else:
+        log_action(f"Would ensure {control_dir} exists (mode 0700)")
 
+    current_os = detect_os()
     for src in sorted(src_dir.glob("*.conf")):
+        if src.name == "01-macos-keychain.conf" and current_os != OS.MACOS:
+            continue
         create_symlink(src, config_d / src.name, config)
 
+    if current_os != OS.MACOS:
+        stale_macos = config_d / "01-macos-keychain.conf"
+        if stale_macos.exists() or stale_macos.is_symlink():
+            if config.dry_run:
+                log_action(f"Would remove non-macOS fragment {stale_macos}")
+            else:
+                stale_macos.unlink()
+                log_success(f"Removed non-macOS fragment {stale_macos}")
+
     ensure_ssh_config_include(ssh_dir / "config", config)
+
+
+def setup_macos_launch_agents(dotfiles: Path, home: Path, config: Config) -> None:
+    """Install LaunchAgents that set GUI-session env vars on every login.
+
+    Currently used so Zed sees ``LOCAL_NOTEBOOK_DEV=1`` without a manual
+    ``launchctl setenv`` after each reboot. Plists are copied (not symlinked)
+    because launchd can be picky about symlinked agents. The variable is also
+    set immediately so the current session works without re-login.
+
+    Parameters
+    ----------
+    dotfiles : Path
+        Root of the dotfiles repository.
+    home : Path
+        User home directory.
+    config : Config
+        Installer configuration.
+
+    Returns
+    -------
+    None
+        Side effect only: copies plists and sets the env var. No-op off macOS.
+    """
+    if detect_os() != OS.MACOS:
+        return
+
+    print("\n[launchd] Setting up macOS LaunchAgents...")
+
+    src_dir = dotfiles / "launchd"
+    if not src_dir.is_dir():
+        log_warning(f"Missing LaunchAgents directory: {src_dir}")
+        return
+
+    agents_dir = home / "Library" / "LaunchAgents"
+    for src in sorted(src_dir.glob("*.plist")):
+        dest = agents_dir / src.name
+        if dest.is_file() and not dest.is_symlink() and dest.read_bytes() == src.read_bytes():
+            log_info(f"LaunchAgent already up to date: {dest}")
+            continue
+        if config.dry_run:
+            log_action(f"Would copy {src} -> {dest}")
+            continue
+        if not backup_file(dest, config):
+            continue
+        try:
+            agents_dir.mkdir(parents=True, exist_ok=True)
+            if dest.is_symlink():
+                dest.unlink()
+            shutil.copy2(src, dest)
+            log_success(f"Installed LaunchAgent: {dest}")
+        except OSError as e:
+            log_error(f"Failed to install {dest}: {e}")
+
+    run_command(["launchctl", "setenv", "LOCAL_NOTEBOOK_DEV", "1"], config)
 
 
 def setup_shell_configs(dotfiles: Path, home: Path, config: Config) -> None:
     print("\n[1/3] Setting up shell configurations...")
 
-    create_symlink(dotfiles / ".bashrc", home / ".bashrc", config)
-    create_symlink(dotfiles / ".zshrc", home / ".zshrc", config)
+    fish_path = shutil.which("fish")
+    if not fish_path:
+        log_warning("fish not found; install it first (brew install fish)")
+        return
+    shells = Path("/etc/shells")
+    if shells.is_file() and fish_path not in shells.read_text().split():
+        log_info(f"Add fish to /etc/shells: echo {fish_path} | sudo tee -a /etc/shells")
+    if os.environ.get("SHELL") != fish_path:
+        log_info(f"Make fish your login shell: chsh -s {fish_path}")
 
 
 def setup_env_local_templates(dotfiles: Path, config: Config) -> None:
@@ -389,10 +470,6 @@ def setup_env_local_templates(dotfiles: Path, config: Config) -> None:
         Side effect only: creates missing local env overlay files.
     """
     pairs = (
-        (
-            dotfiles / "zsh" / "env.local.example.zsh",
-            dotfiles / "zsh" / "env.local.zsh",
-        ),
         (
             dotfiles / "fish" / "env.local.example.fish",
             dotfiles / "fish" / "env.local.fish",
@@ -459,6 +536,115 @@ def setup_tool_configs(dotfiles: Path, config_dir: Path, config: Config) -> None
     create_symlink(dotfiles / "uv" / "uv.toml", uv_config_dir / "uv.toml", config)
 
 
+def setup_terminal_and_cli_configs(dotfiles: Path, config_dir: Path, config: Config) -> None:
+    """Symlink ghostty, kitty, atuin, mise configs and include the delta gitconfig."""
+    print("\n[cli] Setting up terminal and CLI tool configs...")
+    links = (
+        ("ghostty/config", "ghostty/config"),
+        ("kitty/kitty.conf", "kitty/kitty.conf"),
+        ("kitty/dark-theme.auto.conf", "kitty/dark-theme.auto.conf"),
+        ("kitty/light-theme.auto.conf", "kitty/light-theme.auto.conf"),
+        ("kitty/no-preference-theme.auto.conf", "kitty/no-preference-theme.auto.conf"),
+        ("atuin/config.toml", "atuin/config.toml"),
+        ("mise/config.toml", "mise/config.toml"),
+        ("ruff/ruff.toml", "ruff/ruff.toml"),
+        ("agents/opencode.json", "opencode/opencode.json"),
+    )
+    for src, dest in links:
+        dest_path = config_dir / dest
+        if not config.dry_run:
+            dest_path.parent.mkdir(parents=True, exist_ok=True)
+        create_symlink(dotfiles / src, dest_path, config)
+
+    home = config_dir.parent
+    agent_links = (
+        ("claude/settings.json", home / ".claude" / "settings.json"),
+        ("agents/AGENTS.md", home / ".claude" / "CLAUDE.md"),
+        ("agents/AGENTS.md", home / ".agents" / "AGENTS.md"),
+        ("agents/AGENTS.md", config_dir / "opencode" / "AGENTS.md"),
+    )
+    for src, dest_path in agent_links:
+        if not config.dry_run:
+            dest_path.parent.mkdir(parents=True, exist_ok=True)
+        create_symlink(dotfiles / src, dest_path, config)
+
+    cargo_cfg = home / ".cargo" / "config.toml"
+    if not config.dry_run:
+        cargo_cfg.parent.mkdir(parents=True, exist_ok=True)
+    create_symlink(dotfiles / "cargo" / "config.toml", cargo_cfg, config)
+
+    # Shared skills: dotfiles/agents/skills/* -> ~/.agents/skills/, then
+    # everything in ~/.agents/skills/ -> ~/.claude/skills/ (opencode reads ~/.agents).
+    shared = home / ".agents" / "skills"
+    claude_skills = home / ".claude" / "skills"
+    if not config.dry_run:
+        shared.mkdir(parents=True, exist_ok=True)
+        claude_skills.mkdir(parents=True, exist_ok=True)
+    custom = dotfiles / "agents" / "skills"
+    for skill in sorted(p for p in custom.iterdir() if p.is_dir()):
+        create_symlink(skill, shared / skill.name, config)
+    if shared.is_dir():
+        for skill in sorted(p for p in shared.iterdir() if p.is_dir()):
+            if not (claude_skills / skill.name).exists():
+                create_symlink(skill, claude_skills / skill.name, config)
+
+    existing = subprocess.run(
+        ["git", "config", "--global", "--get-all", "include.path"],
+        capture_output=True,
+        text=True,
+    ).stdout.split()
+    for name in ("defaults.gitconfig", "delta.gitconfig"):
+        include = str(dotfiles / "git" / name)
+        if include not in existing:
+            run_command(
+                ["git", "config", "--global", "--add", "include.path", include],
+                config,
+            )
+
+
+def setup_zed_configs(dotfiles: Path, config_dir: Path, config: Config) -> None:
+    """Symlink Zed settings, keymap, and snippets into the Zed config dir.
+
+    Files are linked individually so Zed's own state (prompt DB, themes)
+    in ``~/.config/zed`` is left alone.
+
+    Parameters
+    ----------
+    dotfiles : Path
+        Root of the dotfiles repository.
+    config_dir : Path
+        User config directory (``~/.config`` on macOS/Linux).
+    config : Config
+        Installer configuration.
+
+    Returns
+    -------
+    None
+        Side effect only: creates symlinks for Zed config files.
+    """
+    print("\n[zed] Setting up Zed configuration...")
+
+    src_dir = dotfiles / "zed"
+    if not src_dir.is_dir():
+        log_warning(f"Missing Zed config directory: {src_dir}")
+        return
+
+    zed_dir = config_dir / "zed"
+    if not config.dry_run:
+        zed_dir.mkdir(parents=True, exist_ok=True)
+
+    for name in ("settings.json", "keymap.json"):
+        create_symlink(src_dir / name, zed_dir / name, config)
+
+    snippets_src = src_dir / "snippets"
+    if snippets_src.is_dir():
+        snippets_dir = zed_dir / "snippets"
+        if not config.dry_run:
+            snippets_dir.mkdir(parents=True, exist_ok=True)
+        for snippet in sorted(snippets_src.glob("*.json")):
+            create_symlink(snippet, snippets_dir / snippet.name, config)
+
+
 def print_header() -> None:
     print("=" * 60)
     print("  Dotfiles Installation Script")
@@ -487,6 +673,7 @@ class Tool:
 TOOLS: list[Tool] = [
     Tool("Starship", "starship", True, "starship", None, "Cross-shell prompt"),
     Tool("uv", "uv", True, "uv", None, "Python package manager"),
+    Tool("zoxide", "zoxide", False, "zoxide", None, "Smarter cd (replaces cd)"),
     Tool("fzf", "fzf", False, "fzf", "fzf", "Fuzzy finder"),
     Tool("bat", "bat", False, "bat", "bat", "Cat replacement with syntax highlighting"),
     Tool("eza", "eza", False, "eza", None, "Tree and extended file listing"),
@@ -494,7 +681,7 @@ TOOLS: list[Tool] = [
     Tool("fd", "fd", False, "fd", "fd-find", "Fast find replacement"),
     Tool("lazygit", "lazygit", False, "lazygit", None, "Terminal UI for git"),
     Tool("neovim", "nvim", False, "neovim", "neovim", "Vim-based text editor"),
-    Tool("fish", "fish", False, "fish", "fish", "Friendly interactive shell"),
+    Tool("fish", "fish", True, "fish", "fish", "Friendly interactive shell"),
 ]
 
 
@@ -613,13 +800,17 @@ def print_post_install(missing: list[Tool]) -> None:
     if required_missing:
         print(f"    {step}. Install missing required tools (see commands above)")
         step += 1
-    print(f"    {step}. Open a new terminal or run: source ~/.zshrc")
+    print(f"    {step}. Open a new terminal or run: source ~/.config/fish/config.fish (or just open a new fish terminal)")
     step += 1
     print(f"    {step}. Ensure a Nerd Font is installed for icons")
     step += 1
-    print(f"    {step}. Client machines: run workstation-auth (password once / day), then ssh hduva")
+    print(
+        f"    {step}. Client machines: auth hduva | auth perlmutter | auth user@host"
+    )
     step += 1
-    print(f"    {step}. Workstation host only: run workstation-ca-setup (sudo) once")
+    print(
+        f"    {step}. CA-fleet hosts only: run workstation-ca-setup (sudo) once per machine"
+    )
 
     print("\n  Recommended Nerd Fonts:")
     print("    - FiraCode Nerd Font")
@@ -646,7 +837,7 @@ def parse_args() -> Config:
     parser.add_argument(
         "--install-deps",
         action="store_true",
-        help="Install dependencies (starship, fzf, bat, eza, ripgrep)",
+        help="Install dependencies (starship, zoxide, fzf, bat, eza, ripgrep)",
     )
 
     args = parser.parse_args()
@@ -677,8 +868,11 @@ def main() -> int:
     setup_shell_configs(dotfiles, home, config)
     setup_env_local_templates(dotfiles, config)
     setup_fish_configs(dotfiles, config_dir, config)
+    setup_terminal_and_cli_configs(dotfiles, config_dir, config)
     setup_bin_scripts(dotfiles, home, config)
     setup_ssh_configs(dotfiles, home, config)
+    setup_macos_launch_agents(dotfiles, home, config)
+    setup_zed_configs(dotfiles, config_dir, config)
 
     if config.install_deps:
         install_dependencies(config)

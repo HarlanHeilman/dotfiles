@@ -1,0 +1,9 @@
+# Global cargo settings. Per-project .cargo/config.toml overrides these.
+[build]
+rustc-wrapper = "sccache"
+
+[net]
+git-fetch-with-cli = true
+
+[term]
+color = "auto"

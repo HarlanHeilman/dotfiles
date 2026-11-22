@@ -1,0 +1,7 @@
+# Global tool versions only. Do NOT put secrets in [env]; secrets come from `infisical run`.
+[settings]
+experimental = false
+idiomatic_version_file_enable_tools = ["node", "python"]
+
+[tools]
+node = "24"
