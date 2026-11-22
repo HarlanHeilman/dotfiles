@@ -53,7 +53,11 @@
       "Bash(git push --force *)",
       "Bash(git push -f *)",
       "Bash(rm -rf /*)",
-      "Bash(rm -rf ~*)"
+      "Bash(rm -rf ~*)",
+      "Bash(security find-generic-password *)",
+      "Bash(security dump-keychain *)",
+      "Bash(security export *)",
+      "Bash(secret get *)"
     ],
     "additionalDirectories": [
       "/tmp"

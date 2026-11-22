@@ -13,7 +13,7 @@ end
 set -g __dotfiles_fish_dir "$DOTFILES/fish"
 set -g fish_function_path "$__dotfiles_fish_dir/functions" $fish_function_path
 
-for __dotfiles_module in env path aliases
+for __dotfiles_module in env path aliases secrets
     set -l __dotfiles_module_path "$__dotfiles_fish_dir/$__dotfiles_module.fish"
     if test -r $__dotfiles_module_path
         source $__dotfiles_module_path

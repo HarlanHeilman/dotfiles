@@ -13,7 +13,7 @@
 
 ## Secrets
 - Project secrets (xray-atlas only) live in Infisical: run commands that need them via `infisical run --env=<env> -- <cmd>`.
-- Personal secrets and tokens live only in the gitignored `~/dotfiles/fish/env.local.fish` on this Mac, which is the source of truth. Do not move them to Infisical.
+- Personal secrets and tokens live in the macOS login Keychain (service `dotfiles:NAME`), loaded into env by `fish/secrets.fish`. This Mac is the source of truth. Never run `security find-generic-password`, `secret get`, or dump the keychain. Do not move them to Infisical.
 - Never read, print, or commit `.env*` files, tokens, or `~/dotfiles/fish/env.local.fish`. Do not run `infisical export` or `infisical secrets`.
 
 ## Git

@@ -34,7 +34,7 @@ Optional: `bin/macos-defaults` applies keyboard, Finder, Dock and screenshot pre
 
 ## Local secrets
 
-Gitignored: `fish/env.local.fish` (copy from `env.local.example.fish`) and `~/.config/fish/config.local.fish`. This Mac is the source of truth for personal secrets. Infisical is used only for the xray-atlas project (`infisical run -- ...`); agents are denied access to `.env*` and these files.
+Personal tokens live in the macOS login Keychain, not in files: `secret set NAME`, `secret list` (names are listed in `fish/secrets.fish` and exported at shell start). Non-secret machine overrides go in gitignored `fish/env.local.fish` (copy from `env.local.example.fish`) or `~/.config/fish/config.local.fish`. This Mac is the source of truth for personal secrets. Infisical is used only for the xray-atlas project (`infisical run -- ...`); agents are denied access to `.env*` and these files.
 
 ## Notes
 
