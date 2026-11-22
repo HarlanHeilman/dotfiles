@@ -76,5 +76,6 @@ cask "ngrok"
 cask "vscodium"
 
 # Fonts
+cask "font-sf-mono"
 cask "font-fira-code-nerd-font"
 cask "font-roboto-mono-nerd-font"
